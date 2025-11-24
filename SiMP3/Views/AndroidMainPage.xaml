@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<TabbedPage
+    x:Class="SiMP3.AndroidMainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:SiMP3.Models"
+    BarBackgroundColor="#111111"
+    BarTextColor="White"
+    SelectedTabColor="#C084FC"
+    UnselectedTabColor="#DDDDDD"
+    BackgroundColor="#111111">
+
+    <!-- ====================== PLAYLIST TAB ====================== -->
+    <ContentPage Title="PLAYLIST">
+        <Grid RowDefinitions="*,Auto"
+              BackgroundColor="#111111"
+              Padding="0,0,0,4">
+
+            <!-- Список треків -->
+            <CollectionView
+                x:Name="PlaylistView"
+                Grid.Row="0"
+                ItemsSource="{Binding Tracks}"
+                SelectionMode="Single"
+                SelectionChanged="OnTrackSelected">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:TrackModel">
+                        <Grid Padding="10"
+                              ColumnDefinitions="Auto,*"
+                              ColumnSpacing="10">
+                            <Frame WidthRequest="44"
+                                   HeightRequest="44"
+                                   Padding="0"
+                                   CornerRadius="22"
+                                   BackgroundColor="#222">
+                                <Image Source="{Binding Cover}"
+                                       Aspect="AspectFill" />
+                            </Frame>
+
+                            <VerticalStackLayout Grid.Column="1"
+                                                 Spacing="2">
+                                <Label Text="{Binding Title}"
+                                       FontSize="14"
+                                       FontAttributes="Bold"
+                                       TextColor="White"
+                                       LineBreakMode="TailTruncation" />
+                                <Label Text="{Binding Artist}"
+                                       FontSize="12"
+                                       TextColor="#AAAAAA"
+                                       LineBreakMode="TailTruncation" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- MINI PLAYER BAR -->
+            <Border x:Name="MiniPlayerBar"
+                    Grid.Row="1"
+                    Margin="6,0,6,6"
+                    Padding="10,6"
+                    BackgroundColor="#2B2B2B"
+                    StrokeShape="RoundRectangle 18"
+                    IsVisible="False">
+
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                      ColumnSpacing="10"
+                      VerticalOptions="Center">
+
+                    <!-- Обкладинка -->
+                    <Frame WidthRequest="40"
+                           HeightRequest="40"
+                           Padding="0"
+                           CornerRadius="20"
+                           BackgroundColor="#333">
+                        <Image x:Name="MiniCover"
+                               Aspect="AspectFill" />
+                    </Frame>
+
+                    <!-- Назва/артист -->
+                    <VerticalStackLayout Grid.Column="1"
+                                         Spacing="2"
+                                         VerticalOptions="Center">
+                        <Label x:Name="MiniTitle"
+                               FontSize="13"
+                               FontAttributes="Bold"
+                               TextColor="White"
+                               LineBreakMode="TailTruncation" />
+                        <Label x:Name="MiniArtist"
+                               FontSize="11"
+                               TextColor="#BBBBBB"
+                               LineBreakMode="TailTruncation" />
+                    </VerticalStackLayout>
+
+                    <!-- Play/Pause -->
+                    <ImageButton Grid.Column="2"
+                                 x:Name="MiniPlayPauseBtn"
+                                 Source="play_btn.png"
+                                 BackgroundColor="Transparent"
+                                 HeightRequest="32"
+                                 WidthRequest="32"
+                                 Clicked="OnPlayPauseClicked" />
+
+                    <!-- Next -->
+                    <ImageButton Grid.Column="3"
+                                 Source="next.png"
+                                 BackgroundColor="Transparent"
+                                 HeightRequest="28"
+                                 WidthRequest="28"
+                                 Clicked="OnNextClicked" />
+                </Grid>
+
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnMiniPlayerTapped" />
+                </Border.GestureRecognizers>
+            </Border>
+
+        </Grid>
+    </ContentPage>
+
+    <!-- ====================== PLAYER TAB ====================== -->
+    <ContentPage Title="PLAYER">
+        <Grid RowDefinitions="*,Auto,Auto"
+              BackgroundColor="#111111"
+              Padding="16,12">
+
+            <!-- Обкладинка -->
+            <Frame Grid.Row="0"
+                   BackgroundColor="#222222"
+                   CornerRadius="24"
+                   Padding="12">
+                <Image x:Name="PlayerCover"
+                       Aspect="AspectFill" />
+            </Frame>
+
+            <!-- Назва, артист -->
+            <VerticalStackLayout Grid.Row="1"
+                                 Spacing="4"
+                                 Margin="4,8,4,0">
+                <Label x:Name="PlayerTitle"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       LineBreakMode="TailTruncation" />
+                <Label x:Name="PlayerArtist"
+                       FontSize="14"
+                       TextColor="#CCCCCC"
+                       LineBreakMode="TailTruncation" />
+            </VerticalStackLayout>
+
+            <!-- Прогрес + кнопки -->
+            <VerticalStackLayout Grid.Row="2"
+                                 Spacing="12"
+                                 Margin="4,8,4,8">
+
+                <!-- Прогрес -->
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <Label x:Name="PlayerTimeStart"
+                           Text="0:00"
+                           FontSize="11"
+                           TextColor="#BBBBBB"
+                           VerticalOptions="Center" />
+                    <Slider x:Name="PlayerProgressSlider"
+                            Grid.Column="1"
+                            Minimum="0"
+                            Maximum="1"
+                            ValueChanged="OnSeekChanged" />
+                    <Label x:Name="PlayerTimeEnd"
+                           Grid.Column="2"
+                           Text="0:00"
+                           FontSize="11"
+                           TextColor="#BBBBBB"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center" />
+                </Grid>
+
+                <!-- Кнопки керування -->
+                <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,*"
+                      ColumnSpacing="16"
+                      Margin="0,4,0,0">
+
+                    <ImageButton Grid.Column="1"
+                                 x:Name="PlayerShuffleBtn"
+                                 Source="shuffle.png"
+                                 BackgroundColor="Transparent"
+                                 Opacity="0.5"
+                                 HeightRequest="26"
+                                 WidthRequest="26"
+                                 Clicked="OnShuffleClicked" />
+
+                    <ImageButton Grid.Column="2"
+                                 Source="prev.png"
+                                 BackgroundColor="Transparent"
+                                 HeightRequest="34"
+                                 WidthRequest="34"
+                                 Clicked="OnPrevClicked" />
+
+                    <ImageButton Grid.Column="3"
+                                 x:Name="PlayerPlayPauseBtn"
+                                 Source="play_btn.png"
+                                 BackgroundColor="Transparent"
+                                 HeightRequest="44"
+                                 WidthRequest="44"
+                                 Clicked="OnPlayPauseClicked" />
+
+                    <ImageButton Grid.Column="4"
+                                 Source="next.png"
+                                 BackgroundColor="Transparent"
+                                 HeightRequest="34"
+                                 WidthRequest="34"
+                                 Clicked="OnNextClicked" />
+
+                    <ImageButton Grid.Column="5"
+                                 x:Name="PlayerRepeatBtn"
+                                 Source="repeat.png"
+                                 BackgroundColor="Transparent"
+                                 Opacity="0.5"
+                                 HeightRequest="26"
+                                 WidthRequest="26"
+                                 Clicked="OnRepeatClicked" />
+                </Grid>
+            </VerticalStackLayout>
+
+        </Grid>
+    </ContentPage>
+
+</TabbedPage>
