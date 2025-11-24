@@ -231,4 +231,14 @@ public partial class MainPage : ContentPage
 
         _isPlaylistVisible = !_isPlaylistVisible;
     }
+
+    // Keep only the event handler that matches the XAML ToolbarItem signature
+    private void OnCancelImportClicked(object sender, EventArgs e)
+    {
+        _controller.CancelImport();
+        _ = MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            await DisplayAlert("Імпорт", "Імпорт скасовано.", "OK");
+        });
+    }
 }

@@ -20,6 +20,19 @@ public partial class AndroidMainPage : TabbedPage
         _controller = new MusicController(AudioManager.Current);
         BindingContext = this;
 
+        // Add Cancel Import toolbar/menu item on Android using Command
+        ToolbarItems.Add(new ToolbarItem
+        {
+            Text = "Cancel import",
+            IconImageSource = "cancel.png",
+            Order = ToolbarItemOrder.Primary,
+            Command = new Command(async () =>
+            {
+                _controller.CancelImport();
+                await DisplayAlert("Імпорт", "Імпорт скасовано.", "OK");
+            })
+        });
+
 #if ANDROID
     // авто-підхват всіх локальних треків один раз
     var autoTracks = _controller.FindLocalMusicAndroid();

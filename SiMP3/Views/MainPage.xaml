@@ -5,6 +5,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     BackgroundColor="#0B0B0C">
 
+    <!-- Toolbar: Cancel import (XAML, крос‑платформено) -->
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Cancel import"
+                     IconImageSource="cancel.png"
+                     Clicked="OnCancelImportClicked"
+                     Order="Primary"
+                     Priority="0" />
+    </ContentPage.ToolbarItems>
+
     <!-- ===================== RESOURCES / STYLES ===================== -->
     <ContentPage.Resources>
         <!-- Colors -->

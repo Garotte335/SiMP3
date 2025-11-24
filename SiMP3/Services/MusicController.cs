@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Maui;
 using Microsoft.Maui.Controls;
@@ -19,9 +21,16 @@ namespace SiMP3.Services
         private readonly IAudioManager _audioManager;
         private IAudioPlayer? _player;
 
+        // new: захист доступу до _player та збереження потоку
+        private readonly object _playerLock = new();
+        private Stream? _playerStream;
+
         // "База" усіх треків по абсолютному шляху
         private readonly Dictionary<string, TrackModel> _allTracks =
             new(StringComparer.OrdinalIgnoreCase);
+
+        // lock для словників треків
+        private readonly object _tracksLock = new();
 
         // Для сортування "за датою додавання"
         private readonly Dictionary<string, DateTime> _addedAt =
@@ -50,6 +59,9 @@ namespace SiMP3.Services
 
         private string _filterQuery = string.Empty;
         private TrackSortMode _sortMode = TrackSortMode.ByTitle;
+
+        // CancellationTokenSource для імпорту
+        private CancellationTokenSource? _importCts;
 
         public int CurrentIndex => _currentIndex;
 
@@ -88,7 +100,7 @@ namespace SiMP3.Services
                         });
                     }
 
-                    // --- авто-перехід на наступний трек ---
+                    // --- авто-перехід на наступний трек (резервна логіка) ---
                     if (dur > 0 && dur - pos < 0.25)
                     {
                         if (_repeatMode == 2)
@@ -112,21 +124,41 @@ namespace SiMP3.Services
         {
             try
             {
+                // snapshot під lock, щоб уникнути race з паралельним AddTracksAsync
+                List<TrackStateDto> snapshotTracks;
+                int snapshotCurrentIndex;
+                double snapshotPosition;
+                double snapshotVolume;
+                bool snapshotIsMuted;
+                bool snapshotIsShuffle;
+                int snapshotRepeatMode;
+
+                lock (_tracksLock)
+                {
+                    snapshotTracks = _allTracks.Values
+                        .Select(t => new TrackStateDto { Path = t.Path })
+                        .ToList();
+
+                    snapshotCurrentIndex = CurrentTrack != null
+                        ? _allTracks.Keys.ToList().IndexOf(CurrentTrack.Path)
+                        : -1;
+
+                    snapshotPosition = _player?.CurrentPosition ?? 0;
+                    snapshotVolume = _player != null ? _player.Volume : _lastVolumeBeforeMute;
+                    snapshotIsMuted = _isMuted;
+                    snapshotIsShuffle = _isShuffle;
+                    snapshotRepeatMode = _repeatMode;
+                }
+
                 var state = new PlayerStateDto
                 {
-                    Tracks = _allTracks.Values
-                        .Select(t => new TrackStateDto { Path = t.Path })
-                        .ToList(),
-
-                    CurrentIndex = CurrentTrack != null
-                        ? _allTracks.Keys.ToList().IndexOf(CurrentTrack.Path)
-                        : -1,
-
-                    CurrentPositionSeconds = _player?.CurrentPosition ?? 0,
-                    Volume = _player != null ? _player.Volume : _lastVolumeBeforeMute,
-                    IsMuted = _isMuted,
-                    IsShuffle = _isShuffle,
-                    RepeatMode = _repeatMode
+                    Tracks = snapshotTracks,
+                    CurrentIndex = snapshotCurrentIndex,
+                    CurrentPositionSeconds = snapshotPosition,
+                    Volume = snapshotVolume,
+                    IsMuted = snapshotIsMuted,
+                    IsShuffle = snapshotIsShuffle,
+                    RepeatMode = snapshotRepeatMode
                 };
 
                 await PlayerStateStore.SaveAsync(state);
@@ -145,8 +177,12 @@ namespace SiMP3.Services
                 var state = await PlayerStateStore.LoadAsync();
                 var playlists = await PlayerStateStore.LoadPlaylistsAsync();
 
-                _allTracks.Clear();
-                _addedAt.Clear();
+                lock (_tracksLock)
+                {
+                    _allTracks.Clear();
+                    _addedAt.Clear();
+                }
+
                 Tracks.Clear();
                 _playlists.Clear();
 
@@ -249,20 +285,48 @@ namespace SiMP3.Services
 
         /// <summary>
         /// Додає ОДИН трек у "базу" (без дублікатів по повному шляху).
-        /// Якщо трек уже був – повертає існуючу модель.
+        /// Якщо трек вже був – повертає існуючу модель.
+        /// Параметр refresh дозволяє уникнути багаторазових ApplyFilterAndSort під час пакетного додавання.
         /// </summary>
-        public TrackModel AddTrack(string path)
+        public TrackModel AddTrack(string path, bool refresh = true)
         {
             if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentNullException(nameof(path));
 
             path = Path.GetFullPath(path);
 
-            if (_allTracks.TryGetValue(path, out var existing))
-                return existing;
+            lock (_tracksLock)
+            {
+                if (_allTracks.TryGetValue(path, out var existing))
+                    return existing;
+            }
 
-            TrackModel model;
+            TrackModel model = CreateTrackModelFromPath(path);
 
+            bool doRefresh = refresh;
+
+            lock (_tracksLock)
+            {
+                _allTracks[path] = model;
+                _addedAt[path] = model.DateAdded;
+            }
+
+            // Перераховуємо "вид" лише якщо потрібно
+            if (doRefresh)
+                ApplyFilterAndSort();
+
+            // Якщо нічого не було – робимо цей трек поточним
+            if (_currentIndex == -1 && Tracks.Count > 0)
+            {
+                _currentIndex = Tracks.IndexOf(model);
+                TrackChanged?.Invoke(model);
+            }
+
+            return model;
+        }
+
+        private TrackModel CreateTrackModelFromPath(string path)
+        {
             try
             {
                 using var tagFile = TagLib.File.Create(path);
@@ -283,10 +347,9 @@ namespace SiMP3.Services
                 string genre = tagFile.Tag.FirstGenre ?? "Unknown Genre";
                 string year = tagFile.Tag.Year == 0 ? "Unknown Year" : tagFile.Tag.Year.ToString();
                 uint trackNum = tagFile.Tag.Track;
+                var duration = tagFile.Properties?.Duration ?? TimeSpan.Zero;
 
-                var duration = tagFile.Properties.Duration;
-
-                model = new TrackModel
+                return new TrackModel
                 {
                     Path = path,
                     Title = title,
@@ -303,7 +366,7 @@ namespace SiMP3.Services
             }
             catch
             {
-                model = new TrackModel
+                return new TrackModel
                 {
                     Path = path,
                     Title = Path.GetFileNameWithoutExtension(path),
@@ -314,41 +377,126 @@ namespace SiMP3.Services
                     DateAdded = DateTime.UtcNow
                 };
             }
-
-            _allTracks[path] = model;
-            _addedAt[path] = model.DateAdded;
-
-            // Перераховуємо "вид" з урахуванням фільтрів/сортування
-            ApplyFilterAndSort();
-
-            // Якщо нічого не було – робимо цей трек поточним
-            if (_currentIndex == -1 && Tracks.Count > 0)
-            {
-                _currentIndex = Tracks.IndexOf(model);
-                TrackChanged?.Invoke(model);
-            }
-
-            return model;
         }
 
         /// <summary>
         /// Додає набір треків. Дублікат по тому самому шляху просто ігнорується.
+        /// Оптимізовано: один виклик ApplyFilterAndSort() після усіх доданих треків.
         /// </summary>
         public void AddTracks(IEnumerable<string> paths)
         {
-            if (paths == null) return;
-
-            foreach (var path in paths)
+            // відміняємо попередній імпорт (якщо існує) і стартуємо новий
+            lock (_tracksLock)
             {
-                try
+                if (_importCts != null)
                 {
-                    AddTrack(path);
+                    try
+                    {
+                        _importCts.Cancel();
+                    }
+                    catch { }
+                    _importCts.Dispose();
+                    _importCts = null;
                 }
-                catch
+                _importCts = new CancellationTokenSource();
+            }
+
+            _ = AddTracksAsync(paths, _importCts.Token);
+        }
+
+        public void CancelImport()
+        {
+            lock (_tracksLock)
+            {
+                if (_importCts != null && !_importCts.IsCancellationRequested)
                 {
-                    // один із файлів міг не прочитатися – ігноруємо
+                    Trace.WriteLine($"[{DateTime.UtcNow:O}] Import cancelled by user.");
+                    try { _importCts.Cancel(); } catch { }
+                    _importCts.Dispose();
+                    _importCts = null;
                 }
             }
+        }
+
+        private async Task AddTracksAsync(IEnumerable<string> paths, CancellationToken ct, int batchSize = 50)
+        {
+            if (paths == null) return;
+
+            Trace.WriteLine($"[{DateTime.UtcNow:O}] AddTracksAsync start. Count ~ {(paths as ICollection<string>)?.Count ?? -1}");
+
+            var toProcess = paths.Where(p => !string.IsNullOrWhiteSpace(p))
+                                 .Select(p => Path.GetFullPath(p))
+                                 .Distinct(StringComparer.OrdinalIgnoreCase)
+                                 .Where(fp =>
+                                 {
+                                     lock (_tracksLock)
+                                     {
+                                         return !_allTracks.ContainsKey(fp);
+                                     }
+                                 })
+                                 .ToList();
+
+            if (toProcess.Count == 0) return;
+
+            var added = new List<TrackModel>();
+            var semaphore = new SemaphoreSlim(Math.Max(1, Environment.ProcessorCount));
+
+            var tasks = toProcess.Select(async fp =>
+            {
+                ct.ThrowIfCancellationRequested();
+                await semaphore.WaitAsync(ct).ConfigureAwait(false);
+                try
+                {
+                    ct.ThrowIfCancellationRequested();
+                    // парсимо метадані в фоновому потоці
+                    var model = await Task.Run(() =>
+                    {
+                        ct.ThrowIfCancellationRequested();
+                        return CreateTrackModelFromPath(fp);
+                    }, ct).ConfigureAwait(false);
+
+                    lock (_tracksLock)
+                    {
+                        _allTracks[fp] = model;
+                        _addedAt[fp] = model.DateAdded;
+                    }
+                    lock (added)
+                    {
+                        added.Add(model);
+                    }
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            }).ToArray();
+
+            try
+            {
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                Trace.WriteLine($"[{DateTime.UtcNow:O}] AddTracksAsync cancelled.");
+                return;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[{DateTime.UtcNow:O}] AddTracksAsync error: {ex}");
+            }
+
+            // Оновлюємо UI один раз (на MainThread)
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                ApplyFilterAndSort();
+                if (_currentIndex == -1 && Tracks.Count > 0)
+                {
+                    _currentIndex = 0;
+                    TrackChanged?.Invoke(Tracks[_currentIndex]);
+                }
+            });
+
+            Trace.WriteLine($"[{DateTime.UtcNow:O}] AddTracksAsync finished. Added {added.Count} tracks.");
         }
 
         #endregion
@@ -381,12 +529,12 @@ namespace SiMP3.Services
 
             if (_isPlaying)
             {
-                _player.Pause();
+                try { _player.Pause(); } catch { }
                 _isPlaying = false;
             }
             else
             {
-                _player.Play();
+                try { _player.Play(); } catch { }
                 _isPlaying = true;
             }
 
@@ -402,14 +550,32 @@ namespace SiMP3.Services
 
             try
             {
-                _player?.Stop();
-                _player?.Dispose();
+                // Safely dispose previous player and stream, then create new ones
+                lock (_playerLock)
+                {
+                    if (_player != null)
+                    {
+                        Trace.WriteLine($"[{DateTime.UtcNow:O}] Disposing previous player. Thread:{Environment.CurrentManagedThreadId}\n{Environment.StackTrace}");
+                        try { _player.PlaybackEnded -= OnPlayerPlaybackEnded; } catch { }
+                        try { _player.Stop(); } catch (Exception ex) { Trace.WriteLine($"Stop error: {ex}"); }
+                        try { _player.Dispose(); } catch (Exception ex) { Trace.WriteLine($"Dispose error: {ex}"); }
+                        _player = null;
+                    }
 
-                var stream = File.OpenRead(track.Path);
-                _player = _audioManager.CreatePlayer(stream);
-                _player.Volume = (float)_lastVolumeBeforeMute;
+                    if (_playerStream != null)
+                    {
+                        try { _playerStream.Dispose(); } catch (Exception ex) { Trace.WriteLine($"Stream dispose error: {ex}"); }
+                        _playerStream = null;
+                    }
 
-                // якщо є збережена позиція – відновлюємо один раз
+                    _playerStream = File.OpenRead(track.Path);
+                    Trace.WriteLine($"[{DateTime.UtcNow:O}] Creating player for {track.Path}");
+                    _player = _audioManager.CreatePlayer(_playerStream);
+                    _player.Volume = (float)_lastVolumeBeforeMute;
+                    try { _player.PlaybackEnded += OnPlayerPlaybackEnded; } catch { }
+                }
+
+                // restore saved position if any (outside lock)
                 if (_savedPositionSeconds > 0)
                 {
                     try
@@ -432,7 +598,7 @@ namespace SiMP3.Services
             catch
             {
                 // якщо файл не прочитався – пробуємо перейти на наступний
-                Next();
+                try { Next(); } catch { }
             }
         }
 
@@ -483,7 +649,24 @@ namespace SiMP3.Services
 
         public void Stop()
         {
-            _player?.Stop();
+            lock (_playerLock)
+            {
+                if (_player != null)
+                {
+                    Trace.WriteLine($"[{DateTime.UtcNow:O}] Stop called. Disposing player. Thread:{Environment.CurrentManagedThreadId}\n{Environment.StackTrace}");
+                    try { _player.PlaybackEnded -= OnPlayerPlaybackEnded; } catch { }
+                    try { _player.Stop(); } catch (Exception ex) { Trace.WriteLine($"Stop error: {ex}"); }
+                    try { _player.Dispose(); } catch (Exception ex) { Trace.WriteLine($"Dispose error: {ex}"); }
+                    _player = null;
+                }
+
+                if (_playerStream != null)
+                {
+                    try { _playerStream.Dispose(); } catch (Exception ex) { Trace.WriteLine($"Stream dispose error: {ex}"); }
+                    _playerStream = null;
+                }
+            }
+
             _isPlaying = false;
             PlayStateChanged?.Invoke(false);
         }
@@ -517,7 +700,7 @@ namespace SiMP3.Services
             _isSeeking = true;
 
             double newPos = relative * dur;
-            _player.Seek(newPos);
+            try { _player.Seek(newPos); } catch { }
 
             await Task.Delay(150);
             _isSeeking = false;
@@ -538,7 +721,9 @@ namespace SiMP3.Services
             _lastVolumeBeforeMute = value;
 
             if (_player != null)
-                _player.Volume = (float)value;
+            {
+                try { _player.Volume = (float)value; } catch { }
+            }
 
             VolumeStateChanged?.Invoke(value, _isMuted);
         }
@@ -552,7 +737,9 @@ namespace SiMP3.Services
 
                 _volumeInternalChange = true;
                 if (_player != null)
-                    _player.Volume = 0f;
+                {
+                    try { _player.Volume = 0f; } catch { }
+                }
                 VolumeStateChanged?.Invoke(0.0, true);
                 _volumeInternalChange = false;
             }
@@ -563,7 +750,9 @@ namespace SiMP3.Services
 
                 _volumeInternalChange = true;
                 if (_player != null)
-                    _player.Volume = (float)restore;
+                {
+                    try { _player.Volume = (float)restore; } catch { }
+                }
                 VolumeStateChanged?.Invoke(restore, false);
                 _volumeInternalChange = false;
             }
@@ -591,39 +780,45 @@ namespace SiMP3.Services
             ApplyFilterAndSort();
         }
 
+        // Replace ApplyFilterAndSort() with this corrected and thread-safe version:
         private void ApplyFilterAndSort()
         {
             IEnumerable<TrackModel> baseSet;
 
-            if (!string.IsNullOrEmpty(ActivePlaylistName))
+            // Take snapshot under lock to avoid races with AddTracksAsync
+            lock (_tracksLock)
             {
-                var pl = _playlists.FirstOrDefault(p =>
-                    string.Equals(p.Name, ActivePlaylistName, StringComparison.OrdinalIgnoreCase));
-
-                if (pl != null)
+                if (!string.IsNullOrEmpty(ActivePlaylistName))
                 {
-                    baseSet = pl.TrackPaths
-                        .Where(p => _allTracks.TryGetValue(p, out _))
-                        .Select(p => _allTracks[p]);
+                    var pl = _playlists.FirstOrDefault(p =>
+                        string.Equals(p.Name, ActivePlaylistName, StringComparison.OrdinalIgnoreCase));
+
+                    if (pl != null)
+                    {
+                        baseSet = pl.TrackPaths
+                            .Where(p => _allTracks.TryGetValue(p, out _))
+                            .Select(p => _allTracks[p])
+                            .ToList();
+                    }
+                    else
+                    {
+                        baseSet = _allTracks.Values.ToList();
+                    }
                 }
                 else
                 {
-                    baseSet = _allTracks.Values;
+                    baseSet = _allTracks.Values.ToList();
                 }
             }
-            else
-            {
-                baseSet = _allTracks.Values;
-            }
 
-            // Фільтр по тексту
+            // Фільтр по тексту (оптимізовано: IndexOf з StringComparison)
             if (!string.IsNullOrEmpty(_filterQuery))
             {
-                var q = _filterQuery.ToLowerInvariant();
+                var q = _filterQuery;
                 baseSet = baseSet.Where(t =>
-                    (!string.IsNullOrEmpty(t.Title) && t.Title.ToLowerInvariant().Contains(q)) ||
-                    (!string.IsNullOrEmpty(t.Artist) && t.Artist.ToLowerInvariant().Contains(q)) ||
-                    (!string.IsNullOrEmpty(t.Album) && t.Album.ToLowerInvariant().Contains(q)));
+                    (!string.IsNullOrEmpty(t.Title) && t.Title.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                    (!string.IsNullOrEmpty(t.Artist) && t.Artist.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                    (!string.IsNullOrEmpty(t.Album) && t.Album.IndexOf(q, StringComparison.OrdinalIgnoreCase) >= 0));
             }
 
             // Сортування
@@ -746,6 +941,17 @@ namespace SiMP3.Services
         }
 
         #endregion
+
+        private void OnPlayerPlaybackEnded(object? sender, EventArgs e)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                if (_repeatMode == 2)
+                    PlayCurrentInternal();
+                else
+                    Next();
+            });
+        }
     }
 
     public enum TrackSortMode
