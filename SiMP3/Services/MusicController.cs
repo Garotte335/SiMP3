@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Maui;
+using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using Plugin.Maui.Audio;
 using SiMP3.Models;
@@ -135,13 +136,25 @@ namespace SiMP3.Services
 
                 lock (_tracksLock)
                 {
-                    snapshotTracks = _allTracks.Values
-                        .Select(t => new TrackStateDto { Path = t.Path })
+                    // Order snapshot according to the current Tracks collection to keep indexes consistent
+                    var orderedPaths = Tracks
+                        .Select(t => t.Path)
                         .ToList();
 
-                    snapshotCurrentIndex = CurrentTrack != null
-                        ? _allTracks.Keys.ToList().IndexOf(CurrentTrack.Path)
-                        : -1;
+                    var orderedSet = new HashSet<string>(orderedPaths, StringComparer.OrdinalIgnoreCase);
+                    var remainingPaths = _allTracks.Keys
+                        .Where(p => !orderedSet.Contains(p))
+                        .ToList();
+
+                    snapshotTracks = orderedPaths
+                        .Concat(remainingPaths)
+                        .Select(p => new TrackStateDto { Path = p })
+                        .ToList();
+
+                    snapshotCurrentIndex =
+                        _currentIndex >= 0 && _currentIndex < orderedPaths.Count
+                            ? _currentIndex
+                            : -1;
 
                     snapshotPosition = _player?.CurrentPosition ?? 0;
                     snapshotVolume = _player != null ? _player.Volume : _lastVolumeBeforeMute;
@@ -201,10 +214,11 @@ namespace SiMP3.Services
                     AddTracks(state.Tracks.Select(t => t.Path));
                 }
 
-                if (state.CurrentIndex >= 0 && state.CurrentIndex < _allTracks.Count)
+                if (state.Tracks != null &&
+                    state.CurrentIndex >= 0 &&
+                    state.CurrentIndex < state.Tracks.Count)
                 {
-                    var allPaths = _allTracks.Keys.ToList();
-                    var path = allPaths[state.CurrentIndex];
+                    var path = state.Tracks[state.CurrentIndex].Path;
 
                     _savedPositionSeconds = state.CurrentPositionSeconds;
                     _isShuffle = state.IsShuffle;
@@ -243,41 +257,49 @@ namespace SiMP3.Services
 
         #region Завантаження треків
 
-        public IEnumerable<string> FindLocalMusicAndroid()
+        public async Task<IEnumerable<string>> FindLocalMusicAndroidAsync()
         {
 #if ANDROID
             var result = new List<string>();
 
-            string[] roots =
+            PermissionStatus status;
+
+            if (DeviceInfo.Version.Major >= 13)
+                status = await Permissions.RequestAsync<Permissions.Media>();
+            else
+                status = await Permissions.RequestAsync<Permissions.StorageRead>();
+
+            if (status != PermissionStatus.Granted)
+                return result;
+
+            var resolver = Platform.AppContext.ContentResolver;
+            var audioUri = Android.Provider.MediaStore.Audio.Media.ExternalContentUri;
+
+            string[] projection =
             {
-                Android.OS.Environment.GetExternalStoragePublicDirectory(
-                    Android.OS.Environment.DirectoryMusic)?.AbsolutePath,
-                Android.OS.Environment.ExternalStorageDirectory?.AbsolutePath
+                Android.Provider.MediaStore.Audio.Media.InterfaceConsts.Data
             };
 
-            string[] exts = { ".mp3", ".wav", ".ogg", ".flac", ".m4a" };
-
-            foreach (var root in roots.Where(r => !string.IsNullOrEmpty(r)))
+            using var cursor = resolver.Query(audioUri, projection, null, null, null);
+            if (cursor != null)
             {
-                if (!Directory.Exists(root))
-                    continue;
-
-                try
+                int dataIndex = cursor.GetColumnIndex(Android.Provider.MediaStore.Audio.Media.InterfaceConsts.Data);
+                while (cursor.MoveToNext())
                 {
-                    foreach (var f in Directory.EnumerateFiles(root, "*.*", SearchOption.AllDirectories))
+                    try
                     {
-                        var ext = Path.GetExtension(f).ToLowerInvariant();
-                        if (exts.Contains(ext))
-                            result.Add(f);
+                        var path = cursor.GetString(dataIndex);
+                        if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
+                            result.Add(Path.GetFullPath(path));
                     }
-                }
-                catch
-                {
-                    // якщо немає прав до якоїсь папки – просто скіпаємо
+                    catch
+                    {
+                        // skip corrupted entries
+                    }
                 }
             }
 
-            return result;
+            return result.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 #else
             return Enumerable.Empty<string>();
 #endif
