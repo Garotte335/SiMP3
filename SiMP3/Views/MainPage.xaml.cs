@@ -4,6 +4,8 @@ using SiMP3.Models;
 using SiMP3.Services;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System;
+using System.Threading.Tasks;
 
 namespace SiMP3;
 
@@ -69,6 +71,11 @@ public partial class MainPage : ContentPage
         await _controller.SaveStateAsync();
 
         base.OnDisappearing();
+    }
+
+    private async void OnSortClicked(object sender, EventArgs e)
+    {
+        await ShowSortMenuAsync();
     }
 
 
@@ -241,4 +248,24 @@ public partial class MainPage : ContentPage
             await DisplayAlert("Імпорт", "Імпорт скасовано.", "OK");
         });
     }
+
+    private async Task ShowSortMenuAsync()
+    {
+        var choice = await DisplayActionSheet("Сортування", "Скасувати", null,
+            "За назвою", "За артистом", "За тривалістю", "За датою додавання");
+
+        if (string.IsNullOrWhiteSpace(choice) || choice == "Скасувати")
+            return;
+
+        var mode = choice switch
+        {
+            "За артистом" => TrackSortMode.ByArtist,
+            "За тривалістю" => TrackSortMode.ByDuration,
+            "За датою додавання" => TrackSortMode.ByAdded,
+            _ => TrackSortMode.ByTitle
+        };
+
+        _controller.SetSortMode(mode);
+    }
+
 }

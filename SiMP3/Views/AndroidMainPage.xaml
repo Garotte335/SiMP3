@@ -63,7 +63,7 @@
                     StrokeShape="RoundRectangle 18"
                     IsVisible="False">
 
-                <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto"
                       ColumnSpacing="10"
                       VerticalOptions="Center">
 
@@ -74,7 +74,9 @@
                            CornerRadius="20"
                            BackgroundColor="#333">
                         <Image x:Name="MiniCover"
-                               Aspect="AspectFill" />
+                               Aspect="AspectFit"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center" />
                     </Frame>
 
                     <!-- Назва/артист -->
@@ -92,8 +94,16 @@
                                LineBreakMode="TailTruncation" />
                     </VerticalStackLayout>
 
-                    <!-- Play/Pause -->
+                    <!-- Prev -->
                     <ImageButton Grid.Column="2"
+                                 Source="prev.png"
+                                 BackgroundColor="Transparent"
+                                 HeightRequest="28"
+                                 WidthRequest="28"
+                                 Clicked="OnPrevClicked" />
+
+                    <!-- Play/Pause -->
+                    <ImageButton Grid.Column="3"
                                  x:Name="MiniPlayPauseBtn"
                                  Source="play_btn.png"
                                  BackgroundColor="Transparent"
@@ -102,7 +112,7 @@
                                  Clicked="OnPlayPauseClicked" />
 
                     <!-- Next -->
-                    <ImageButton Grid.Column="3"
+                    <ImageButton Grid.Column="4"
                                  Source="next.png"
                                  BackgroundColor="Transparent"
                                  HeightRequest="28"
@@ -130,7 +140,9 @@
                    CornerRadius="24"
                    Padding="12">
                 <Image x:Name="PlayerCover"
-                       Aspect="AspectFill" />
+                       Aspect="AspectFit"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
             </Frame>
 
             <!-- Назва, артист -->

@@ -87,7 +87,7 @@
 
                 <!-- Тут можна підвісити платформений blur (WinUI) через handler -->
 
-                <Grid ColumnDefinitions="Auto,*,Auto"
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto"
                       ColumnSpacing="12">
 
                     <HorizontalStackLayout Spacing="6">
@@ -112,6 +112,14 @@
                            VerticalOptions="Center" />
 
                     <Button Grid.Column="2"
+                            Text="Сортувати"
+                            Clicked="OnSortClicked"
+                            Padding="14,6"
+                            BackgroundColor="#22242A"
+                            TextColor="White"
+                            CornerRadius="8" />
+
+                    <Button Grid.Column="3"
                             Text="Додати файли"
                             Clicked="OnPickFilesClicked"
                             Padding="14,6"
@@ -202,7 +210,7 @@
                         </Border.Shadow>
 
                         <Image x:Name="CoverImage"
-                               Aspect="AspectFill"
+                               Aspect="AspectFit"
                                HeightRequest="410"
                                HorizontalOptions="Center"
                                VerticalOptions="Center" />

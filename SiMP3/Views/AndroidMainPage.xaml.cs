@@ -3,6 +3,7 @@ using Plugin.Maui.Audio;
 using SiMP3.Models;
 using SiMP3.Services;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Linq;
 
 namespace SiMP3;
@@ -20,6 +21,14 @@ public partial class AndroidMainPage : TabbedPage
 
         _controller = new MusicController(AudioManager.Current);
         BindingContext = this;
+
+        ToolbarItems.Add(new ToolbarItem
+        {
+            Text = "Sort",
+            IconImageSource = "menu.png",
+            Order = ToolbarItemOrder.Primary,
+            Command = new Command(async () => await ShowSortMenuAsync())
+        });
 
         // Add Cancel Import toolbar/menu item on Android using Command
         ToolbarItems.Add(new ToolbarItem
@@ -153,4 +162,23 @@ public partial class AndroidMainPage : TabbedPage
         if (Children.Count > 1)
             CurrentPage = Children[1];
     }
+    private async Task ShowSortMenuAsync()
+    {
+        var choice = await DisplayActionSheet("Сортування", "Скасувати", null,
+            "За назвою", "За артистом", "За тривалістю", "За датою додавання");
+
+        if (string.IsNullOrWhiteSpace(choice) || choice == "Скасувати")
+            return;
+
+        var mode = choice switch
+        {
+            "За артистом" => TrackSortMode.ByArtist,
+            "За тривалістю" => TrackSortMode.ByDuration,
+            "За датою додавання" => TrackSortMode.ByAdded,
+            _ => TrackSortMode.ByTitle
+        };
+
+        _controller.SetSortMode(mode);
+    }
+
 }
