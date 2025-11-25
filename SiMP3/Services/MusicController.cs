@@ -135,13 +135,25 @@ namespace SiMP3.Services
 
                 lock (_tracksLock)
                 {
-                    snapshotTracks = _allTracks.Values
-                        .Select(t => new TrackStateDto { Path = t.Path })
+                    // Order snapshot according to the current Tracks collection to keep indexes consistent
+                    var orderedPaths = Tracks
+                        .Select(t => t.Path)
                         .ToList();
 
-                    snapshotCurrentIndex = CurrentTrack != null
-                        ? _allTracks.Keys.ToList().IndexOf(CurrentTrack.Path)
-                        : -1;
+                    var orderedSet = new HashSet<string>(orderedPaths, StringComparer.OrdinalIgnoreCase);
+                    var remainingPaths = _allTracks.Keys
+                        .Where(p => !orderedSet.Contains(p))
+                        .ToList();
+
+                    snapshotTracks = orderedPaths
+                        .Concat(remainingPaths)
+                        .Select(p => new TrackStateDto { Path = p })
+                        .ToList();
+
+                    snapshotCurrentIndex =
+                        _currentIndex >= 0 && _currentIndex < orderedPaths.Count
+                            ? _currentIndex
+                            : -1;
 
                     snapshotPosition = _player?.CurrentPosition ?? 0;
                     snapshotVolume = _player != null ? _player.Volume : _lastVolumeBeforeMute;
@@ -201,10 +213,11 @@ namespace SiMP3.Services
                     AddTracks(state.Tracks.Select(t => t.Path));
                 }
 
-                if (state.CurrentIndex >= 0 && state.CurrentIndex < _allTracks.Count)
+                if (state.Tracks != null &&
+                    state.CurrentIndex >= 0 &&
+                    state.CurrentIndex < state.Tracks.Count)
                 {
-                    var allPaths = _allTracks.Keys.ToList();
-                    var path = allPaths[state.CurrentIndex];
+                    var path = state.Tracks[state.CurrentIndex].Path;
 
                     _savedPositionSeconds = state.CurrentPositionSeconds;
                     _isShuffle = state.IsShuffle;
