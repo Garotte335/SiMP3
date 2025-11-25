@@ -175,9 +175,11 @@
                 </Grid>
 
                 <!-- Кнопки керування -->
-                <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,*"
+                <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
                       ColumnSpacing="16"
-                      Margin="0,4,0,0">
+                      Margin="0,4,0,0"
+                      HorizontalOptions="Center"
+                      VerticalOptions="Center">
 
                     <ImageButton Grid.Column="1"
                                  x:Name="PlayerShuffleBtn"
