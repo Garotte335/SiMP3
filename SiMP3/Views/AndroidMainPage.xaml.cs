@@ -10,6 +10,7 @@ namespace SiMP3;
 public partial class AndroidMainPage : TabbedPage
 {
     private readonly MusicController _controller;
+    private bool _autoImportAttempted;
 
     public ObservableCollection<TrackModel> Tracks => _controller.Tracks;
 
@@ -44,8 +45,13 @@ public partial class AndroidMainPage : TabbedPage
         base.OnAppearing();
 
 #if ANDROID
-        var autoTracks = await _controller.FindLocalMusicAndroidAsync();
-        _controller.AddTracks(autoTracks);
+        if (!_autoImportAttempted)
+        {
+            _autoImportAttempted = true;
+
+            var autoTracks = await _controller.FindLocalMusicAndroidAsync();
+            _controller.AddTracks(autoTracks);
+        }
 #endif
     }
 

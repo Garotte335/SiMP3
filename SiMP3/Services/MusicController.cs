@@ -262,7 +262,13 @@ namespace SiMP3.Services
 #if ANDROID
             var result = new List<string>();
 
-            var status = await Permissions.RequestAsync<Permissions.StorageRead>();
+            PermissionStatus status;
+
+            if (DeviceInfo.Version.Major >= 13)
+                status = await Permissions.RequestAsync<Permissions.Media>();
+            else
+                status = await Permissions.RequestAsync<Permissions.StorageRead>();
+
             if (status != PermissionStatus.Granted)
                 return result;
 
