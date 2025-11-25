@@ -33,16 +33,20 @@ public partial class AndroidMainPage : TabbedPage
             })
         });
 
-#if ANDROID
-    // авто-підхват всіх локальних треків один раз
-    var autoTracks = _controller.FindLocalMusicAndroid();
-    _controller.AddTracks(autoTracks);
-#endif
-
         _controller.TrackChanged += Controller_TrackChanged;
         _controller.PlayStateChanged += Controller_PlayStateChanged;
         _controller.ProgressChanged += Controller_ProgressChanged;
         _controller.VolumeStateChanged += Controller_VolumeStateChanged;
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+#if ANDROID
+        var autoTracks = await _controller.FindLocalMusicAndroidAsync();
+        _controller.AddTracks(autoTracks);
+#endif
     }
 
     // ================= TRACK CHANGED =================
