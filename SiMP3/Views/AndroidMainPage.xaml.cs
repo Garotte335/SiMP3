@@ -13,6 +13,7 @@ public partial class AndroidMainPage : TabbedPage
     private readonly MusicController _controller;
     private bool _autoImportAttempted;
 
+
     public ObservableCollection<TrackModel> Tracks => _controller.Tracks;
 
     public AndroidMainPage()

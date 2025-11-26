@@ -1,4 +1,5 @@
-﻿using Microsoft.Maui.Controls;
+﻿using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Controls;
 using Plugin.Maui.Audio;
 using SiMP3.Models;
 using SiMP3.Services;
@@ -12,6 +13,7 @@ namespace SiMP3;
 public partial class MainPage : ContentPage
 {
     private readonly MusicController _controller;
+    private bool _visualizationEnabled;
 
     public ObservableCollection<TrackModel> Tracks => _controller.Tracks;
 
@@ -31,6 +33,7 @@ public partial class MainPage : ContentPage
         _controller.PlayStateChanged += Controller_PlayStateChanged;
         _controller.ProgressChanged += Controller_ProgressChanged;
         _controller.VolumeStateChanged += Controller_VolumeStateChanged;
+        _controller.SpectrumFrameAvailable += Controller_SpectrumFrameAvailable;
     }
 
 
@@ -70,6 +73,8 @@ public partial class MainPage : ContentPage
         // зберігаємо поточний стан (плейлист, трек, позиція, гучність)
         await _controller.SaveStateAsync();
 
+        VisualizationView.Stop();
+
         base.OnDisappearing();
     }
 
@@ -98,6 +103,8 @@ public partial class MainPage : ContentPage
         lblTimeStart.Text = "0:00";
         lblTimeEnd.Text = t.DurationString;
         progressSlider.Value = 0;
+
+        CoverImage.IsVisible = !_visualizationEnabled;
     }
 
 
@@ -196,11 +203,48 @@ public partial class MainPage : ContentPage
             volumeSlider.Value = volume;
     }
 
+    private void Controller_SpectrumFrameAvailable(float[] data)
+    {
+        if (!_visualizationEnabled || data == null)
+            return;
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            if (_visualizationEnabled)
+                VisualizationView.UpdateSpectrum(data);
+        });
+    }
+
     private void OnMuteClicked(object sender, EventArgs e)
     {
         _controller.ToggleMute();
     }
 
+    private void OnVisualizationToggleClicked(object sender, EventArgs e)
+    {
+        _visualizationEnabled = !_visualizationEnabled;
+        UpdateVisualizationState();
+    }
+
+    private void UpdateVisualizationState()
+    {
+        if (_visualizationEnabled)
+        {
+            CoverImage.IsVisible = false;
+            VisualizationView.IsVisible = true;
+            VisualizationView.Start();
+            btnVisualizationToggle.Text = "Visualization Off";
+            _controller.SetVisualizationActive(true);
+        }
+        else
+        {
+            CoverImage.IsVisible = true;
+            VisualizationView.IsVisible = false;
+            VisualizationView.Stop();
+            btnVisualizationToggle.Text = "Visualization On";
+            _controller.SetVisualizationActive(false);
+        }
+    }
 
     // ============================
     // ВИБІР ТРЕКУ ЗІ СПИСКУ

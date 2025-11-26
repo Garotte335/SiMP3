@@ -3,6 +3,7 @@
     x:Class="SiMP3.MainPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:SiMP3.Views"
     BackgroundColor="#0B0B0C">
 
     <!-- Toolbar: Cancel import (XAML, крос‑платформено) -->
@@ -87,7 +88,7 @@
 
                 <!-- Тут можна підвісити платформений blur (WinUI) через handler -->
 
-                <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto"
                       ColumnSpacing="12">
 
                     <HorizontalStackLayout Spacing="6">
@@ -112,6 +113,15 @@
                            VerticalOptions="Center" />
 
                     <Button Grid.Column="2"
+                            x:Name="btnVisualizationToggle"
+                            Text="Зорові образи"
+                            Padding="14,6"
+                            BackgroundColor="#22242A"
+                            TextColor="White"
+                            CornerRadius="8"
+                            Clicked="OnVisualizationToggleClicked" />
+
+                    <Button Grid.Column="3"
                             Text="Сортувати"
                             Clicked="OnSortClicked"
                             Padding="14,6"
@@ -119,7 +129,7 @@
                             TextColor="White"
                             CornerRadius="8" />
 
-                    <Button Grid.Column="3"
+                    <Button Grid.Column="4"
                             Text="Додати файли"
                             Clicked="OnPickFilesClicked"
                             Padding="14,6"
@@ -209,11 +219,16 @@
                                     Opacity="0.5" />
                         </Border.Shadow>
 
-                        <Image x:Name="CoverImage"
-                               Aspect="AspectFit"
-                               HeightRequest="410"
-                               HorizontalOptions="Center"
-                               VerticalOptions="Center" />
+                        <Grid>
+                            <Image x:Name="CoverImage"
+                                   Aspect="AspectFit"
+                                   HeightRequest="410"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center" />
+
+                            <views:AudioVisualizationView x:Name="VisualizationView"
+                                                          IsVisible="False" />
+                        </Grid>
                     </Border>
 
                     <!-- METADATA -->
@@ -248,6 +263,7 @@
 
                         <Label x:Name="lblTrackNumber"
                                Style="{StaticResource CaptionLabel}" />
+
                     </VerticalStackLayout>
                 </Grid>
 

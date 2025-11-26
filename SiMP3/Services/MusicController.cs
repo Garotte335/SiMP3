@@ -21,6 +21,7 @@ namespace SiMP3.Services
     {
         private readonly IAudioManager _audioManager;
         private IAudioPlayer? _player;
+        private AudioVisualizationSampler? _visualizationSampler;
 
         // new: захист доступу до _player та збереження потоку
         private readonly object _playerLock = new();
@@ -252,6 +253,7 @@ namespace SiMP3.Services
         public event Action<bool>? PlayStateChanged;
         public event Action<TimeSpan, TimeSpan, double>? ProgressChanged;
         public event Action<double, bool>? VolumeStateChanged;
+        public event Action<float[]>? SpectrumFrameAvailable;
 
         #endregion
 
@@ -553,11 +555,13 @@ namespace SiMP3.Services
             {
                 try { _player.Pause(); } catch { }
                 _isPlaying = false;
+                _visualizationSampler?.Pause(true);
             }
             else
             {
                 try { _player.Play(); } catch { }
                 _isPlaying = true;
+                _visualizationSampler?.Pause(false);
             }
 
             PlayStateChanged?.Invoke(_isPlaying);
@@ -597,6 +601,8 @@ namespace SiMP3.Services
                     try { _player.PlaybackEnded += OnPlayerPlaybackEnded; } catch { }
                 }
 
+                StartVisualizationSampler(track.Path);
+
                 // restore saved position if any (outside lock)
                 if (_savedPositionSeconds > 0)
                 {
@@ -621,6 +627,23 @@ namespace SiMP3.Services
             {
                 // якщо файл не прочитався – пробуємо перейти на наступний
                 try { Next(); } catch { }
+            }
+        }
+
+        private void StartVisualizationSampler(string path)
+        {
+            try
+            {
+                _visualizationSampler?.Dispose();
+                _visualizationSampler = new AudioVisualizationSampler(path);
+                _visualizationSampler.SpectrumAvailable += data => SpectrumFrameAvailable?.Invoke(data);
+                _visualizationSampler.Start();
+                if (!_isPlaying)
+                    _visualizationSampler.Pause(true);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"Visualization sampler error: {ex}");
             }
         }
 
@@ -689,8 +712,19 @@ namespace SiMP3.Services
                 }
             }
 
+            _visualizationSampler?.Dispose();
+            _visualizationSampler = null;
+
             _isPlaying = false;
             PlayStateChanged?.Invoke(false);
+        }
+
+        public void SetVisualizationActive(bool enabled)
+        {
+            if (_visualizationSampler == null)
+                return;
+
+            _visualizationSampler.Pause(!enabled || !_isPlaying);
         }
 
         #endregion
