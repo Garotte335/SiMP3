@@ -48,6 +48,8 @@ namespace SiMP3.Services
         public string? ActivePlaylistName { get; private set; }
 
         private int _currentIndex = -1;
+        private List<TrackModel>? _currentPlaylist;
+        private int _currentPlaylistIndex = -1;
         private bool _isPlaying;
         private bool _isShuffle;
         private int _repeatMode; // 0 = off, 1 = all, 2 = one
@@ -60,6 +62,8 @@ namespace SiMP3.Services
         private double _savedPositionSeconds; // для відновлення позиції після старту
 
         private string _filterQuery = string.Empty;
+        private string? _artistFilter;
+        private string? _albumFilter;
         private TrackSortMode _sortMode = TrackSortMode.ByTitle;
 
         // CancellationTokenSource для імпорту
@@ -67,8 +71,20 @@ namespace SiMP3.Services
 
         public int CurrentIndex => _currentIndex;
 
-        public TrackModel? CurrentTrack =>
-            (_currentIndex >= 0 && _currentIndex < Tracks.Count ? Tracks[_currentIndex] : null);
+
+
+        public TrackModel? CurrentTrack
+        {
+            get
+            {
+                if (_currentPlaylist != null && _currentPlaylistIndex >= 0 && _currentPlaylistIndex < _currentPlaylist.Count)
+                    return _currentPlaylist[_currentPlaylistIndex];
+
+                return _currentIndex >= 0 && _currentIndex < Tracks.Count
+                    ? Tracks[_currentIndex]
+                    : null;
+            }
+        }
 
         public bool IsPlaying => _isPlaying;
         public bool IsShuffle => _isShuffle;
@@ -533,6 +549,9 @@ namespace SiMP3.Services
                 return;
 
             int index = Tracks.IndexOf(track);
+            _currentPlaylist = null;
+            _currentPlaylistIndex = -1;
+
             if (index < 0)
                 return;
 
@@ -540,12 +559,53 @@ namespace SiMP3.Services
             PlayCurrentInternal();
         }
 
+        public void PlayTrackFromPlaylist(TrackModel track, IList<TrackModel> playlist)
+        {
+            if (track == null || playlist == null)
+                return;
+
+            _currentPlaylist = playlist.Where(t => t != null).ToList();
+            _currentPlaylistIndex = _currentPlaylist.FindIndex(t => string.Equals(t.Path, track.Path, StringComparison.OrdinalIgnoreCase));
+            _currentIndex = Tracks.IndexOf(track);
+
+            if (_currentPlaylistIndex < 0)
+            {
+                _currentPlaylist = null;
+                _currentPlaylistIndex = -1;
+                return;
+            }
+
+            PlayCurrentInternal();
+        }
+
+        public void PlayPlaylist(IEnumerable<TrackModel> tracks)
+        {
+            if (tracks == null)
+                return;
+
+            var list = tracks.Where(t => t != null).ToList();
+            if (list.Count == 0)
+                return;
+
+            _currentPlaylist = list;
+            _currentPlaylistIndex = 0;
+            _currentIndex = -1;
+            PlayCurrentInternal();
+        }
+
         public void TogglePlayPause()
         {
             if (_player == null)
             {
-                if (_currentIndex == -1 && Tracks.Count > 0)
+                if (_currentPlaylist != null)
+                {
+                    if (_currentPlaylistIndex == -1 && _currentPlaylist.Count > 0)
+                        _currentPlaylistIndex = 0;
+                }
+                else if (_currentIndex == -1 && Tracks.Count > 0)
+                {
                     _currentIndex = 0;
+                }
 
                 PlayCurrentInternal();
                 return;
@@ -567,12 +627,26 @@ namespace SiMP3.Services
             PlayStateChanged?.Invoke(_isPlaying);
         }
 
+        private TrackModel? GetCurrentTrackInternal()
+        {
+            if (_currentPlaylist != null)
+            {
+                if (_currentPlaylistIndex < 0 || _currentPlaylistIndex >= _currentPlaylist.Count)
+                    return null;
+                return _currentPlaylist[_currentPlaylistIndex];
+            }
+
+            if (_currentIndex < 0 || _currentIndex >= Tracks.Count)
+                return null;
+
+            return Tracks[_currentIndex];
+        }
+
         private void PlayCurrentInternal()
         {
-            if (_currentIndex < 0 || _currentIndex >= Tracks.Count)
+            var track = GetCurrentTrackInternal();
+            if (track == null)
                 return;
-
-            var track = Tracks[_currentIndex];
 
             try
             {
@@ -649,6 +723,28 @@ namespace SiMP3.Services
 
         public void Next()
         {
+            if (_currentPlaylist != null && _currentPlaylist.Count > 0)
+            {
+                if (_isShuffle)
+                    _currentPlaylistIndex = Random.Shared.Next(_currentPlaylist.Count);
+                else
+                    _currentPlaylistIndex++;
+
+                if (_currentPlaylistIndex >= _currentPlaylist.Count)
+                {
+                    if (_repeatMode == 1)
+                        _currentPlaylistIndex = 0;
+                    else
+                    {
+                        Stop();
+                        return;
+                    }
+                }
+
+                PlayCurrentInternal();
+                return;
+            }
+
             if (Tracks.Count == 0)
                 return;
 
@@ -673,6 +769,25 @@ namespace SiMP3.Services
 
         public void Prev()
         {
+            if (_currentPlaylist != null && _currentPlaylist.Count > 0)
+            {
+                if (_isShuffle)
+                    _currentPlaylistIndex = Random.Shared.Next(_currentPlaylist.Count);
+                else
+                    _currentPlaylistIndex--;
+
+                if (_currentPlaylistIndex < 0)
+                {
+                    if (_repeatMode == 1)
+                        _currentPlaylistIndex = _currentPlaylist.Count - 1;
+                    else
+                        _currentPlaylistIndex = 0;
+                }
+
+                PlayCurrentInternal();
+                return;
+            }
+
             if (Tracks.Count == 0)
                 return;
 
@@ -824,6 +939,18 @@ namespace SiMP3.Services
             ApplyFilterAndSort();
         }
 
+        public void SetArtistFilter(string? artist)
+        {
+            _artistFilter = string.IsNullOrWhiteSpace(artist) ? null : artist;
+            ApplyFilterAndSort();
+        }
+
+        public void SetAlbumFilter(string? album)
+        {
+            _albumFilter = string.IsNullOrWhiteSpace(album) ? null : album;
+            ApplyFilterAndSort();
+        }
+
         public void SetSortMode(TrackSortMode mode)
         {
             _sortMode = mode;
@@ -834,6 +961,14 @@ namespace SiMP3.Services
         {
             ActivePlaylistName = string.IsNullOrWhiteSpace(name) ? null : name;
             ApplyFilterAndSort();
+        }
+
+        public List<TrackModel> GetAllTracksSnapshot()
+        {
+            lock (_tracksLock)
+            {
+                return _allTracks.Values.ToList();
+            }
         }
 
         // Replace ApplyFilterAndSort() with this corrected and thread-safe version:
@@ -865,6 +1000,16 @@ namespace SiMP3.Services
                 {
                     baseSet = _allTracks.Values.ToList();
                 }
+            }
+
+            if (!string.IsNullOrWhiteSpace(_artistFilter))
+            {
+                baseSet = baseSet.Where(t => string.Equals(t.Artist, _artistFilter, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(_albumFilter))
+            {
+                baseSet = baseSet.Where(t => string.Equals(t.Album, _albumFilter, StringComparison.OrdinalIgnoreCase));
             }
 
             // Фільтр по тексту (оптимізовано: IndexOf з StringComparison)

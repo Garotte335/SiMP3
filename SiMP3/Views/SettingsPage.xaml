@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SiMP3.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="#0D0D0D">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="SurfaceColor">#121212</Color>
+            <Color x:Key="CardColor">#161616</Color>
+            <Color x:Key="BorderColor">#1F1F1F</Color>
+            <Color x:Key="PrimaryTextColor">#FFFFFF</Color>
+            <Color x:Key="MutedTextColor">#B0B0B0</Color>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="18">
+            <Label Text="Settings" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource PrimaryTextColor}" />
+
+            <Border BackgroundColor="{StaticResource CardColor}" Stroke="{StaticResource BorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="14">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="About application" FontSize="16" TextColor="{StaticResource PrimaryTextColor}" FontAttributes="Bold" />
+                    <Label Text="SiMP3 music player. Version 1.0. Author: SiMP3 team." TextColor="{StaticResource MutedTextColor}" FontSize="14" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border BackgroundColor="{StaticResource CardColor}" Stroke="{StaticResource BorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="14">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalOptions="Center">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Clear playlists" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource PrimaryTextColor}" />
+                        <Label Text="Remove all saved playlists, including Favorites." TextColor="{StaticResource MutedTextColor}" FontSize="13" />
+                    </VerticalStackLayout>
+                    <Button Grid.Column="1" Text="Clear" Clicked="OnClearPlaylists" BackgroundColor="#E53935" TextColor="White" CornerRadius="12" Padding="14,10" />
+                </Grid>
+            </Border>
+
+            <Border BackgroundColor="{StaticResource CardColor}" Stroke="{StaticResource BorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="14">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalOptions="Center">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Check for updates" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource PrimaryTextColor}" />
+                        <Label Text="Coming soon." TextColor="{StaticResource MutedTextColor}" FontSize="13" />
+                    </VerticalStackLayout>
+                    <Button Grid.Column="1" Text="Check" Clicked="OnCheckUpdates" BackgroundColor="{StaticResource SurfaceColor}" TextColor="{StaticResource PrimaryTextColor}" CornerRadius="12" Padding="14,10" />
+                </Grid>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

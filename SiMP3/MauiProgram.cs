@@ -22,10 +22,15 @@ namespace SiMP3
 
             // MAIN MUSIC CONTROLLER
             builder.Services.AddSingleton<MusicController>();
+            builder.Services.AddSingleton<PlaylistService>();
+            builder.Services.AddSingleton<IPlayerOverlayService, PlayerOverlayService>();
 
             // PAGES
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<AndroidMainPage>();
+            builder.Services.AddTransient<Views.PlaylistPage>();
+            builder.Services.AddTransient<Views.PlaylistEditorPage>();
+            builder.Services.AddTransient<Views.SettingsPage>();
 
             builder.ConfigureLifecycleEvents(events =>
             {

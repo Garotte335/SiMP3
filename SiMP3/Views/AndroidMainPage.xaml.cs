@@ -1,4 +1,5 @@
-﻿using Microsoft.Maui.Controls;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui.Controls;
 using Plugin.Maui.Audio;
 using SiMP3.Models;
 using SiMP3.Services;
@@ -14,8 +15,14 @@ namespace SiMP3;
 public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
 {
     private readonly MusicController _controller;
+    private readonly PlaylistService _playlistService;
     private bool _autoImportAttempted;
     private bool _isUpdatingSelection;
+    private bool _isOpeningPlaylists;
+    private string _searchQuery = string.Empty;
+    private string? _selectedArtist;
+    private string? _selectedAlbum;
+    private Views.PlaylistPage? _playlistPage;
 
 
     private string _selectedTab = string.Empty;
@@ -32,7 +39,8 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
     {
         InitializeComponent();
 
-        _controller = new MusicController(AudioManager.Current);
+        _controller = App.Services.GetService<MusicController>() ?? new MusicController(AudioManager.Current);
+        _playlistService = App.Services.GetService<PlaylistService>() ?? new PlaylistService();
         SelectedTab = Tabs.First();
         BindingContext = this;
 
@@ -67,6 +75,9 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
     {
         base.OnAppearing();
 
+        App.Services.GetRequiredService<IPlayerOverlayService>()
+            .Register(FullPlayerOverlay);
+
 #if ANDROID
         if (!_autoImportAttempted)
         {
@@ -76,6 +87,8 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
             _controller.AddTracks(autoTracks);
         }
 #endif
+        await _playlistService.EnsureLoadedAsync();
+        UpdateFavoriteIcon(_controller.CurrentTrack);
     }
 
     // ================= TRACK CHANGED =================
@@ -97,8 +110,10 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
         PlayerProgressSlider.Value = 0;
 
         _isUpdatingSelection = true;
-        PlaylistView.SelectedItem = t;
+        PlaylistView.SelectedItem = Tracks.Contains(t) ? t : null;
         _isUpdatingSelection = false;
+
+        UpdateFavoriteIcon(t);
     }
 
     // ================= PLAY / PAUSE =================
@@ -179,20 +194,152 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
     // ================= MINI PLAYER TAP =================
     private void OnMiniPlayerTapped(object sender, TappedEventArgs e)
     {
-        FullPlayerOverlay.IsVisible = true;
+        App.Services.GetRequiredService<IPlayerOverlayService>()
+            .Register(FullPlayerOverlay);
     }
 
     private void OnCloseFullPlayer(object sender, EventArgs e)
-        => FullPlayerOverlay.IsVisible = false;
+    {
+        var overlay = App.Services.GetRequiredService<IPlayerOverlayService>();
+        overlay.Hide();
+    }
 
     // ================= TAB SWITCHER =================
     private void OnTabSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (_isOpeningPlaylists)
+            return;
+
         if (e.CurrentSelection?.FirstOrDefault() is string tab)
         {
+            if (tab == "Playlists")
+            {
+                _ = OpenPlaylistsAsync();
+                return;
+            }
+
             SelectedTab = tab;
+            _ = ApplyTabSelectionAsync(tab);
         }
     }
+    private async Task OpenPlaylistsAsync()
+    {
+        if (_isOpeningPlaylists)
+            return;
+
+        _isOpeningPlaylists = true;
+        try
+        {
+            _playlistPage = new Views.PlaylistPage(_playlistService, _controller);
+            _playlistPage.ApplySearch(SelectedTab == "Playlists" ? _searchQuery : null);
+            await Navigation.PushModalAsync(new NavigationPage(_playlistPage)
+            {
+                BarBackgroundColor = Color.FromArgb("#0D0D0D"),
+                BarTextColor = Colors.White
+            });
+        }
+        finally
+        {
+            _isOpeningPlaylists = false;
+            SelectedTab = Tabs.First();
+            TabStrip.SelectedItem = SelectedTab;
+        }
+    }
+
+    private async Task ApplyTabSelectionAsync(string tab)
+    {
+        _controller.SetArtistFilter(null);
+        _controller.SetAlbumFilter(null);
+
+        if (tab == "Artists")
+        {
+            var artists = _controller.GetAllTracksSnapshot().Select(t => t.Artist).Where(a => !string.IsNullOrWhiteSpace(a)).Distinct().OrderBy(a => a).ToArray();
+            var choice = await DisplayActionSheet("Select artist", "Cancel", null, artists);
+            if (string.IsNullOrWhiteSpace(choice) || choice == "Cancel")
+            {
+                SelectedTab = Tabs.First();
+                TabStrip.SelectedItem = SelectedTab;
+            }
+            else
+            {
+                _selectedArtist = choice;
+                _controller.SetArtistFilter(choice);
+            }
+        }
+        else if (tab == "Albums")
+        {
+            var albums = _controller.GetAllTracksSnapshot().Select(t => t.Album).Where(a => !string.IsNullOrWhiteSpace(a)).Distinct().OrderBy(a => a).ToArray();
+            var choice = await DisplayActionSheet("Select album", "Cancel", null, albums);
+            if (string.IsNullOrWhiteSpace(choice) || choice == "Cancel")
+            {
+                SelectedTab = Tabs.First();
+                TabStrip.SelectedItem = SelectedTab;
+            }
+            else
+            {
+                _selectedAlbum = choice;
+                _controller.SetAlbumFilter(choice);
+            }
+        }
+        else
+        {
+            _selectedAlbum = null;
+            _selectedArtist = null;
+        }
+
+        _controller.SetFilter(_searchQuery);
+    }
+
+    private void OnSearchChanged(object sender, TextChangedEventArgs e)
+    {
+        ApplySearchFilter(e.NewTextValue ?? string.Empty);
+    }
+
+    private void ApplySearchFilter(string query)
+    {
+        _searchQuery = query;
+        if (string.IsNullOrWhiteSpace(query))
+            _controller.SetFilter(string.Empty);
+        else
+            _controller.SetFilter(query);
+
+        _playlistPage?.ApplySearch(SelectedTab == "Playlists" ? query : null);
+    }
+
+    private async void OnSettingsClicked(object sender, EventArgs e)
+    {
+        await Navigation.PushModalAsync(new NavigationPage(new Views.SettingsPage(_playlistService))
+        {
+            BarBackgroundColor = Color.FromArgb("#0D0D0D"),
+            BarTextColor = Colors.White
+        });
+    }
+
+    private async void OnFavoriteClicked(object sender, EventArgs e)
+    {
+        await _playlistService.EnsureLoadedAsync();
+        var track = _controller.CurrentTrack;
+        if (track == null)
+            return;
+
+        if (_playlistService.IsFavorite(track))
+            await _playlistService.RemoveFromFavorites(track);
+        else
+            await _playlistService.AddToFavorites(track);
+        UpdateFavoriteIcon(track);
+    }
+
+    private void UpdateFavoriteIcon(TrackModel? track)
+    {
+        if (track == null)
+        {
+            FavoriteButton.Opacity = 0.5;
+            return;
+        }
+
+        FavoriteButton.Opacity = _playlistService.IsFavorite(track) ? 1.0 : 0.5;
+    }
+
     private async Task ShowSortMenuAsync()
     {
         var choice = await DisplayActionSheet("Сортування", "Скасувати", null,

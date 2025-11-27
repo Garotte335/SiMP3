@@ -41,7 +41,7 @@
         </Grid.RowDefinitions>
 
         <!-- HEADER -->
-        <Grid Grid.Row="0" Padding="16,12" BackgroundColor="{StaticResource PageBackgroundColor}" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+        <Grid Grid.Row="0" Padding="16,10" BackgroundColor="{StaticResource PageBackgroundColor}" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
             <Label
                 Text="SiMP3"
                 FontSize="22"
@@ -54,11 +54,10 @@
                 BackgroundColor="{StaticResource SurfaceColor}"
                 Stroke="{StaticResource BorderColor}"
                 StrokeThickness="1"
-                Padding="12,8"
-                StrokeShape="RoundRectangle 20"
-                HorizontalOptions="Center"
-                VerticalOptions="Center"
-                WidthRequest="220">
+                 Padding="10,6"
+                StrokeShape="RoundRectangle 18"
+                HorizontalOptions="Fill"
+                VerticalOptions="Center">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalOptions="Center">
                     <Label
                         Text="🔍"
@@ -66,10 +65,12 @@
                         VerticalOptions="Center"
                         TextColor="{StaticResource MutedTextColor}" />
                     <Entry
+                        x:Name="SearchEntry"
                         Style="{StaticResource SearchEntryStyle}"
                         Placeholder="Search"
-                        HorizontalOptions="Fill"
-                        BackgroundColor="Transparent" />
+                        HorizontalOptions="FillAndExpand"
+                        BackgroundColor="Transparent" 
+                        TextChanged="OnSearchChanged"/>
                 </Grid>
             </Border>
 
@@ -84,8 +85,10 @@
                 HorizontalOptions="End"
                 VerticalOptions="Center"
                 Padding="6">
-                <Image
+                <ImageButton
                     Source="menu.png"
+                    BackgroundColor="Transparent"
+                    Clicked="OnSettingsClicked"
                     Aspect="AspectFit"
                     HorizontalOptions="Center"
                     VerticalOptions="Center" />
@@ -99,11 +102,12 @@
                 ItemsSource="{Binding Tabs}"
                 SelectionMode="Single"
                 SelectedItem="{Binding SelectedTab, Mode=TwoWay}"
+                 HorizontalOptions="Center"
                 HorizontalScrollBarVisibility="Never"
                 HeightRequest="44"
                 SelectionChanged="OnTabSelectionChanged">
                 <CollectionView.ItemsLayout>
-                    <LinearItemsLayout Orientation="Horizontal" ItemSpacing="18" />
+                    <LinearItemsLayout Orientation="Horizontal" ItemSpacing="24" />
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
@@ -344,8 +348,8 @@
                 <ImageButton
                     Source="close.png"
                     BackgroundColor="Transparent"
-                    HeightRequest="28"
-                    WidthRequest="28"
+                    HeightRequest="16"
+                    WidthRequest="16"
                     Clicked="OnCloseFullPlayer"
                     HorizontalOptions="Start"
                     VerticalOptions="Center" />
@@ -359,11 +363,21 @@
                     HorizontalOptions="Center"
                     TextColor="{StaticResource PrimaryTextColor}" />
 
-                <BoxView Grid.Column="2" WidthRequest="28" HeightRequest="28" BackgroundColor="Transparent" />
+                <ImageButton
+                    Grid.Column="2"
+                    x:Name="FavoriteButton"
+                    Source="like.png"
+                    BackgroundColor="Transparent"
+                    HeightRequest="28"
+                    WidthRequest="28"
+                    Clicked="OnFavoriteClicked"
+                    HorizontalOptions="End"
+                    VerticalOptions="Center" />
             </Grid>
 
-            <VerticalStackLayout Grid.Row="1" Spacing="0" Padding="28,6,28,28" HorizontalOptions="Center">
+            <Grid Grid.Row="1" RowDefinitions="*,Auto,Auto" RowSpacing="18" Padding="28,6,28,28" HorizontalOptions="Center" VerticalOptions="FillAndExpand">
                 <Border
+                    Grid.Row="0"
                     BackgroundColor="{StaticResource SurfaceColor}"
                     Stroke="{StaticResource BorderColor}"
                     StrokeThickness="1"
@@ -379,7 +393,7 @@
                         VerticalOptions="Center" />
                 </Border>
 
-                <VerticalStackLayout Spacing="4" HorizontalOptions="Center" WidthRequest="320" Margin="0,28,0,0">
+                <VerticalStackLayout Grid.Row="1" Spacing="6" HorizontalOptions="Center" WidthRequest="320" Margin="0,8,0,0" VerticalOptions="Start">
                     <Label
                         x:Name="PlayerTitle"
                         FontSize="20"
@@ -393,35 +407,34 @@
                         HorizontalTextAlignment="Center"
                         TextColor="{StaticResource MutedTextColor}"
                         LineBreakMode="TailTruncation" />
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" WidthRequest="320" Margin="0,14,0,0">
+                        <Label
+                            x:Name="PlayerTimeStart"
+                            Text="0:00"
+                            FontSize="11"
+                            TextColor="{StaticResource MutedTextColor}"
+                            VerticalOptions="Center" />
+                        <Slider
+                            x:Name="PlayerProgressSlider"
+                            Grid.Column="1"
+                            Minimum="0"
+                            Maximum="1"
+                            ThumbColor="{StaticResource AccentColor}"
+                            MinimumTrackColor="{StaticResource AccentColor}"
+                            MaximumTrackColor="#2A2A2A"
+                            ValueChanged="OnSeekChanged" />
+                        <Label
+                            x:Name="PlayerTimeEnd"
+                            Grid.Column="2"
+                            Text="0:00"
+                            FontSize="11"
+                            TextColor="{StaticResource MutedTextColor}"
+                            HorizontalOptions="End"
+                            VerticalOptions="Center" />
+                    </Grid>
                 </VerticalStackLayout>
 
-                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" WidthRequest="320" Margin="0,22,0,0">
-                    <Label
-                        x:Name="PlayerTimeStart"
-                        Text="0:00"
-                        FontSize="11"
-                        TextColor="{StaticResource MutedTextColor}"
-                        VerticalOptions="Center" />
-                    <Slider
-                        x:Name="PlayerProgressSlider"
-                        Grid.Column="1"
-                        Minimum="0"
-                        Maximum="1"
-                        ThumbColor="{StaticResource AccentColor}"
-                        MinimumTrackColor="{StaticResource AccentColor}"
-                        MaximumTrackColor="#2A2A2A"
-                        ValueChanged="OnSeekChanged" />
-                    <Label
-                        x:Name="PlayerTimeEnd"
-                        Grid.Column="2"
-                        Text="0:00"
-                        FontSize="11"
-                        TextColor="{StaticResource MutedTextColor}"
-                        HorizontalOptions="End"
-                        VerticalOptions="Center" />
-                </Grid>
-
-                <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="20" HorizontalOptions="Center" WidthRequest="300" Margin="0,24,0,0">
+                <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="20" HorizontalOptions="Center" WidthRequest="300" VerticalOptions="End" Margin="0,10,0,0">
                     <ImageButton
                         x:Name="PlayerShuffleBtn"
                         Source="shuffle.png"
@@ -466,7 +479,7 @@
                         WidthRequest="30"
                         Clicked="OnRepeatClicked" />
                 </Grid>
-            </VerticalStackLayout>
+            </Grid>
         </Grid>
     </Grid>
 </ContentPage>
