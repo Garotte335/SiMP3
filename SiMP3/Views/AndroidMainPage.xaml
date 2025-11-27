@@ -1,241 +1,420 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<TabbedPage
+<!--
+    Android-only main page with Samsung Music inspired header, tab strip and spacing.
+    The existing playlist, mini-player, and full player layouts are preserved below the tabs.
+-->
+<ContentPage
     x:Class="SiMP3.AndroidMainPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:models="clr-namespace:SiMP3.Models"
-    BarBackgroundColor="#111111"
-    BarTextColor="White"
-    SelectedTabColor="#C084FC"
-    UnselectedTabColor="#DDDDDD"
-    BackgroundColor="#111111">
+   BackgroundColor="{StaticResource PageBackgroundColor}">
 
-    <!-- ====================== PLAYLIST TAB ====================== -->
-    <ContentPage Title="PLAYLIST">
-        <Grid RowDefinitions="*,Auto"
-              BackgroundColor="#111111"
-              Padding="0,0,0,4">
+    <!-- Color and style tokens for the Android layout -->
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="PageBackgroundColor">#F7F7F7</Color>
+            <Color x:Key="SurfaceColor">#FFFFFF</Color>
+            <Color x:Key="AccentColor">#3A57E8</Color>
+            <Color x:Key="MutedTextColor">#9E9E9E</Color>
+            <Color x:Key="PrimaryTextColor">#121212</Color>
 
-            <!-- Список треків -->
+            <Style x:Key="TabLabelStyle" TargetType="Label">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="TextColor" Value="{StaticResource MutedTextColor}" />
+            </Style>
+
+            <Style TargetType="Entry" x:Key="SearchEntryStyle">
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="TextColor" Value="{StaticResource PrimaryTextColor}" />
+                <Setter Property="PlaceholderColor" Value="{StaticResource MutedTextColor}" />
+                <!--<Setter Property="CursorColor" Value="{StaticResource AccentColor}" />-->
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid Padding="16,28,16,16" RowSpacing="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- ============== TOP HEADER: title, search bar, settings button ============== -->
+        <Border
+            Grid.Row="0"
+            BackgroundColor="{StaticResource SurfaceColor}"
+            StrokeShape="RoundRectangle 20"
+            Padding="16">
+            <Border.Shadow>
+                <Shadow Radius="12" Offset="0,4" Opacity="0.08" />
+            </Border.Shadow>
+            <VerticalStackLayout Spacing="14">
+                <Label
+                    Text="SiMP3"
+                    FontSize="28"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource PrimaryTextColor}" />
+
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <!-- Search bar -->
+                    <Border
+                        Grid.Column="0"
+                        BackgroundColor="#F1F3F6"
+                        StrokeShape="RoundRectangle 18"
+                        Padding="12,10">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalOptions="Center">
+                            <Label
+                                Text="🔍"
+                                FontSize="16"
+                                VerticalOptions="Center"
+                                TextColor="{StaticResource MutedTextColor}" />
+                            <Entry
+                                Style="{StaticResource SearchEntryStyle}"
+                                Placeholder="Search…"
+                                HorizontalOptions="Fill" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Settings icon button -->
+                    <Border
+                        Grid.Column="1"
+                        BackgroundColor="#ECF0FB"
+                        StrokeShape="RoundRectangle 16"
+                        Padding="12"
+                        WidthRequest="44"
+                        HeightRequest="44"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center">
+                        <ImageButton
+                            Padding="0"
+                            Source="menu.png"
+                            BackgroundColor="Transparent"
+                            HeightRequest="20"
+                            WidthRequest="20" />
+                    </Border>
+                </Grid>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ============== SAMSUNG-STYLE TAB SWITCHER ============== -->
+        <Border
+            Grid.Row="1"
+            BackgroundColor="{StaticResource SurfaceColor}"
+            StrokeShape="RoundRectangle 16"
+            Padding="8,6">
+            <Border.Shadow>
+                <Shadow Radius="8" Offset="0,2" Opacity="0.05" />
+            </Border.Shadow>
+            
             <CollectionView
-                x:Name="PlaylistView"
-                Grid.Row="0"
-                ItemsSource="{Binding Tracks}"
+                x:Name="TabStrip"
+                ItemsSource="{Binding Tabs}"
                 SelectionMode="Single"
-                SelectionChanged="OnTrackSelected">
+                SelectedItem="{Binding SelectedTab, Mode=TwoWay}"
+                HorizontalScrollBarVisibility="Never"
+                HeightRequest="48"
+                SelectionChanged="OnTabSelectionChanged">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Horizontal" ItemSpacing="12" />
+                </CollectionView.ItemsLayout>
+                
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:TrackModel">
-                        <Grid Padding="10"
-                              ColumnDefinitions="Auto,*"
-                              ColumnSpacing="10">
-                            <Frame WidthRequest="44"
-                                   HeightRequest="44"
-                                   Padding="0"
-                                   CornerRadius="22"
-                                   BackgroundColor="#222">
-                                <Image Source="{Binding Cover}"
-                                       Aspect="AspectFill" />
-                            </Frame>
+                    <DataTemplate>
+                        <Grid WidthRequest="80" RowDefinitions="*,Auto" Padding="8,4">
+                            <!-- Tab label -->
+                            <Label
+                                x:Name="TabLabel"
+                                Text="{Binding .}"
+                                Style="{StaticResource TabLabelStyle}" />
 
-                            <VerticalStackLayout Grid.Column="1"
-                                                 Spacing="2">
-                                <Label Text="{Binding Title}"
-                                       FontSize="14"
-                                       FontAttributes="Bold"
-                                       TextColor="White"
-                                       LineBreakMode="TailTruncation" />
-                                <Label Text="{Binding Artist}"
-                                       FontSize="12"
-                                       TextColor="#AAAAAA"
-                                       LineBreakMode="TailTruncation" />
-                            </VerticalStackLayout>
+                            <!-- Indicator underline -->
+                            <BoxView
+                                x:Name="TabIndicator"
+                                Grid.Row="1"
+                                HeightRequest="2"
+                                HorizontalOptions="Fill"
+                                BackgroundColor="Transparent"
+                                CornerRadius="2" />
+
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup Name="CommonStates">
+                                    <VisualState Name="Normal">
+                                        <VisualState.Setters>
+                                            <Setter TargetName="TabLabel" Property="Label.TextColor" Value="{StaticResource MutedTextColor}" />
+                                            <Setter TargetName="TabIndicator" Property="BoxView.BackgroundColor" Value="Transparent" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState Name="Selected">
+                                        <VisualState.Setters>
+                                            <Setter TargetName="TabLabel" Property="Label.TextColor" Value="{StaticResource PrimaryTextColor}" />
+                                            <Setter TargetName="TabLabel" Property="Label.FontAttributes" Value="Bold" />
+                                            <Setter TargetName="TabIndicator" Property="BoxView.BackgroundColor" Value="{StaticResource AccentColor}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <!-- MINI PLAYER BAR -->
-            <Border x:Name="MiniPlayerBar"
-                    Grid.Row="1"
-                    Margin="6,0,6,6"
-                    Padding="10,6"
-                    BackgroundColor="#2B2B2B"
+        </Border>
+
+        <!-- ============== MAIN CONTENT: track list + player controls ============== -->
+        <ScrollView Grid.Row="2" x:Name="MainScroll" VerticalOptions="FillAndExpand">
+            <VerticalStackLayout Spacing="18">
+                <!-- Track list container -->
+                <Border BackgroundColor="{StaticResource SurfaceColor}" StrokeShape="RoundRectangle 18" Padding="0">
+                    <Grid RowDefinitions="Auto,*" RowSpacing="0">
+                        <Label
+                            Text="Library"
+                            Padding="16,14"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource PrimaryTextColor}" />
+
+                        <CollectionView
+                            x:Name="PlaylistView"
+                            Grid.Row="1"
+                            ItemsSource="{Binding Tracks}"
+                            SelectionMode="Single"
+                            SelectionChanged="OnTrackSelected"
+                            Margin="0,0,0,6">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:TrackModel">
+                                    <Grid Padding="16" ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                        <Frame
+                                            WidthRequest="48"
+                                            HeightRequest="48"
+                                            Padding="0"
+                                            CornerRadius="10"
+                                            HasShadow="False"
+                                            BackgroundColor="#F3F4F6">
+                                            <Image Source="{Binding Cover}" Aspect="AspectFill" />
+                                        </Frame>
+
+                                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                            <Label
+                                                Text="{Binding Title}"
+                                                FontSize="14"
+                                                FontAttributes="Bold"
+                                                TextColor="{StaticResource PrimaryTextColor}"
+                                                LineBreakMode="TailTruncation" />
+                                            <Label
+                                                Text="{Binding Artist}"
+                                                FontSize="12"
+                                                TextColor="{StaticResource MutedTextColor}"
+                                                LineBreakMode="TailTruncation" />
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </Grid>
+                </Border>
+
+                <!-- Mini player bar -->
+                <Border
+                    x:Name="MiniPlayerBar"
+                    Margin="0,0,0,4"
+                    Padding="12"
+                    BackgroundColor="{StaticResource SurfaceColor}"
                     StrokeShape="RoundRectangle 18"
                     IsVisible="False">
+                    <Border.Shadow>
+                        <Shadow Radius="10" Offset="0,2" Opacity="0.06" />
+                    </Border.Shadow>
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="12" VerticalOptions="Center">
+                        <Frame
+                            WidthRequest="44"
+                            HeightRequest="44"
+                            Padding="0"
+                            CornerRadius="12"
+                            BackgroundColor="#F1F2F5"
+                            HasShadow="False">
+                            <Image
+                                x:Name="MiniCover"
+                                Aspect="AspectFill"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
+                        </Frame>
 
-                <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto"
-                      ColumnSpacing="10"
-                      VerticalOptions="Center">
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                            <Label
+                                x:Name="MiniTitle"
+                                FontSize="13"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource PrimaryTextColor}"
+                                LineBreakMode="TailTruncation" />
+                            <Label
+                                x:Name="MiniArtist"
+                                FontSize="11"
+                                TextColor="{StaticResource MutedTextColor}"
+                                LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
 
-                    <!-- Обкладинка -->
-                    <Frame WidthRequest="40"
-                           HeightRequest="40"
-                           Padding="0"
-                           CornerRadius="20"
-                           BackgroundColor="#333">
-                        <Image x:Name="MiniCover"
-                               Aspect="AspectFit"
-                               HorizontalOptions="Center"
-                               VerticalOptions="Center" />
-                    </Frame>
+                        <ImageButton
+                            Grid.Column="2"
+                            Source="prev.png"
+                            BackgroundColor="Transparent"
+                            HeightRequest="28"
+                            WidthRequest="28"
+                            Clicked="OnPrevClicked" />
 
-                    <!-- Назва/артист -->
-                    <VerticalStackLayout Grid.Column="1"
-                                         Spacing="2"
-                                         VerticalOptions="Center">
-                        <Label x:Name="MiniTitle"
-                               FontSize="13"
-                               FontAttributes="Bold"
-                               TextColor="White"
-                               LineBreakMode="TailTruncation" />
-                        <Label x:Name="MiniArtist"
-                               FontSize="11"
-                               TextColor="#BBBBBB"
-                               LineBreakMode="TailTruncation" />
-                    </VerticalStackLayout>
+                        <ImageButton
+                            Grid.Column="3"
+                            x:Name="MiniPlayPauseBtn"
+                            Source="play_btn.png"
+                            BackgroundColor="Transparent"
+                            HeightRequest="32"
+                            WidthRequest="32"
+                            Clicked="OnPlayPauseClicked" />
 
-                    <!-- Prev -->
-                    <ImageButton Grid.Column="2"
-                                 Source="prev.png"
-                                 BackgroundColor="Transparent"
-                                 HeightRequest="28"
-                                 WidthRequest="28"
-                                 Clicked="OnPrevClicked" />
+                        <ImageButton
+                            Grid.Column="4"
+                            Source="next.png"
+                            BackgroundColor="Transparent"
+                            HeightRequest="28"
+                            WidthRequest="28"
+                            Clicked="OnNextClicked" />
+                    </Grid>
 
-                    <!-- Play/Pause -->
-                    <ImageButton Grid.Column="3"
-                                 x:Name="MiniPlayPauseBtn"
-                                 Source="play_btn.png"
-                                 BackgroundColor="Transparent"
-                                 HeightRequest="32"
-                                 WidthRequest="32"
-                                 Clicked="OnPlayPauseClicked" />
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnMiniPlayerTapped" />
+                    </Border.GestureRecognizers>
+                </Border>
 
-                    <!-- Next -->
-                    <ImageButton Grid.Column="4"
-                                 Source="next.png"
-                                 BackgroundColor="Transparent"
-                                 HeightRequest="28"
-                                 WidthRequest="28"
-                                 Clicked="OnNextClicked" />
-                </Grid>
+                <!-- Full player area -->
+                <Border
+                    x:Name="PlayerSection"
+                    BackgroundColor="{StaticResource SurfaceColor}"
+                    StrokeShape="RoundRectangle 22"
+                    Padding="16">
+                    <Border.Shadow>
+                        <Shadow Radius="14" Offset="0,4" Opacity="0.08" />
+                    </Border.Shadow>
+                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="14">
+                        <!-- Album cover -->
+                        <Frame
+                            Grid.Row="0"
+                            BackgroundColor="#F4F5F8"
+                            CornerRadius="24"
+                            Padding="16"
+                            HasShadow="False">
+                            <Image
+                                x:Name="PlayerCover"
+                                Aspect="AspectFit"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
+                        </Frame>
 
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnMiniPlayerTapped" />
-                </Border.GestureRecognizers>
-            </Border>
+                        <!-- Title and artist -->
+                        <VerticalStackLayout Grid.Row="1" Spacing="4" Margin="4,0,4,0">
+                            <Label
+                                x:Name="PlayerTitle"
+                                FontSize="18"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource PrimaryTextColor}"
+                                LineBreakMode="TailTruncation" />
+                            <Label
+                                x:Name="PlayerArtist"
+                                FontSize="14"
+                                TextColor="{StaticResource MutedTextColor}"
+                                LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
 
-        </Grid>
-    </ContentPage>
+                        <!-- Progress + controls -->
+                        <VerticalStackLayout Grid.Row="2" Spacing="12" Margin="0,4,0,0">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                <Label
+                                    x:Name="PlayerTimeStart"
+                                    Text="0:00"
+                                    FontSize="11"
+                                    TextColor="{StaticResource MutedTextColor}"
+                                    VerticalOptions="Center" />
+                                <Slider
+                                    x:Name="PlayerProgressSlider"
+                                    Grid.Column="1"
+                                    Minimum="0"
+                                    Maximum="1"
+                                    ThumbColor="{StaticResource AccentColor}"
+                                    MinimumTrackColor="{StaticResource AccentColor}"
+                                    MaximumTrackColor="#E0E0E0"
+                                    ValueChanged="OnSeekChanged" />
+                                <Label
+                                    x:Name="PlayerTimeEnd"
+                                    Grid.Column="2"
+                                    Text="0:00"
+                                    FontSize="11"
+                                    TextColor="{StaticResource MutedTextColor}"
+                                    HorizontalOptions="End"
+                                    VerticalOptions="Center" />
+                            </Grid>
 
-    <!-- ====================== PLAYER TAB ====================== -->
-    <ContentPage Title="PLAYER">
-        <Grid RowDefinitions="*,Auto,Auto"
-              BackgroundColor="#111111"
-              Padding="16,12">
+                            <Grid
+                                ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
+                                ColumnSpacing="18"
+                                Margin="0,4,0,0"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center">
+                                <ImageButton
+                                    Grid.Column="1"
+                                    x:Name="PlayerShuffleBtn"
+                                    Source="shuffle.png"
+                                    BackgroundColor="Transparent"
+                                    Opacity="0.5"
+                                    HeightRequest="26"
+                                    WidthRequest="26"
+                                    Clicked="OnShuffleClicked" />
 
-            <!-- Обкладинка -->
-            <Frame Grid.Row="0"
-                   BackgroundColor="#222222"
-                   CornerRadius="24"
-                   Padding="12">
-                <Image x:Name="PlayerCover"
-                       Aspect="AspectFit"
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center" />
-            </Frame>
+                                <ImageButton
+                                    Grid.Column="2"
+                                    Source="prev.png"
+                                    BackgroundColor="Transparent"
+                                    HeightRequest="34"
+                                    WidthRequest="34"
+                                    Clicked="OnPrevClicked" />
 
-            <!-- Назва, артист -->
-            <VerticalStackLayout Grid.Row="1"
-                                 Spacing="4"
-                                 Margin="4,8,4,0">
-                <Label x:Name="PlayerTitle"
-                       FontSize="18"
-                       FontAttributes="Bold"
-                       TextColor="White"
-                       LineBreakMode="TailTruncation" />
-                <Label x:Name="PlayerArtist"
-                       FontSize="14"
-                       TextColor="#CCCCCC"
-                       LineBreakMode="TailTruncation" />
+                                <ImageButton
+                                    Grid.Column="3"
+                                    x:Name="PlayerPlayPauseBtn"
+                                    Source="play_btn.png"
+                                    BackgroundColor="Transparent"
+                                    HeightRequest="44"
+                                    WidthRequest="44"
+                                    Clicked="OnPlayPauseClicked" />
+
+                                <ImageButton
+                                    Grid.Column="4"
+                                    Source="next.png"
+                                    BackgroundColor="Transparent"
+                                    HeightRequest="34"
+                                    WidthRequest="34"
+                                    Clicked="OnNextClicked" />
+
+                                <ImageButton
+                                    Grid.Column="5"
+                                    x:Name="PlayerRepeatBtn"
+                                    Source="repeat.png"
+                                    BackgroundColor="Transparent"
+                                    Opacity="0.5"
+                                    HeightRequest="26"
+                                    WidthRequest="26"
+                                    Clicked="OnRepeatClicked" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
             </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
 
-            <!-- Прогрес + кнопки -->
-            <VerticalStackLayout Grid.Row="2"
-                                 Spacing="12"
-                                 Margin="4,8,4,8">
-
-                <!-- Прогрес -->
-                <Grid ColumnDefinitions="Auto,*,Auto">
-                    <Label x:Name="PlayerTimeStart"
-                           Text="0:00"
-                           FontSize="11"
-                           TextColor="#BBBBBB"
-                           VerticalOptions="Center" />
-                    <Slider x:Name="PlayerProgressSlider"
-                            Grid.Column="1"
-                            Minimum="0"
-                            Maximum="1"
-                            ValueChanged="OnSeekChanged" />
-                    <Label x:Name="PlayerTimeEnd"
-                           Grid.Column="2"
-                           Text="0:00"
-                           FontSize="11"
-                           TextColor="#BBBBBB"
-                           HorizontalOptions="End"
-                           VerticalOptions="Center" />
-                </Grid>
-
-                <!-- Кнопки керування -->
-                <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
-                      ColumnSpacing="16"
-                      Margin="0,4,0,0"
-                      HorizontalOptions="Center"
-                      VerticalOptions="Center">
-
-                    <ImageButton Grid.Column="1"
-                                 x:Name="PlayerShuffleBtn"
-                                 Source="shuffle.png"
-                                 BackgroundColor="Transparent"
-                                 Opacity="0.5"
-                                 HeightRequest="26"
-                                 WidthRequest="26"
-                                 Clicked="OnShuffleClicked" />
-
-                    <ImageButton Grid.Column="2"
-                                 Source="prev.png"
-                                 BackgroundColor="Transparent"
-                                 HeightRequest="34"
-                                 WidthRequest="34"
-                                 Clicked="OnPrevClicked" />
-
-                    <ImageButton Grid.Column="3"
-                                 x:Name="PlayerPlayPauseBtn"
-                                 Source="play_btn.png"
-                                 BackgroundColor="Transparent"
-                                 HeightRequest="44"
-                                 WidthRequest="44"
-                                 Clicked="OnPlayPauseClicked" />
-
-                    <ImageButton Grid.Column="4"
-                                 Source="next.png"
-                                 BackgroundColor="Transparent"
-                                 HeightRequest="34"
-                                 WidthRequest="34"
-                                 Clicked="OnNextClicked" />
-
-                    <ImageButton Grid.Column="5"
-                                 x:Name="PlayerRepeatBtn"
-                                 Source="repeat.png"
-                                 BackgroundColor="Transparent"
-                                 Opacity="0.5"
-                                 HeightRequest="26"
-                                 WidthRequest="26"
-                                 Clicked="OnRepeatClicked" />
-                </Grid>
-            </VerticalStackLayout>
-
-        </Grid>
-    </ContentPage>
-
-</TabbedPage>
