@@ -170,12 +170,11 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
     // ================= MINI PLAYER TAP =================
     private void OnMiniPlayerTapped(object sender, TappedEventArgs e)
     {
-        // Scroll to the full player area when the mini bar is tapped
-        if (PlayerSection != null)
-        {
-            MainScroll.ScrollToAsync(PlayerSection, ScrollToPosition.Start, true);
-        }
+        FullPlayerOverlay.IsVisible = true;
     }
+
+    private void OnCloseFullPlayer(object sender, EventArgs e)
+        => FullPlayerOverlay.IsVisible = false;
 
     // ================= TAB SWITCHER =================
     private void OnTabSelectionChanged(object sender, SelectionChangedEventArgs e)
