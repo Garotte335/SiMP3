@@ -176,7 +176,7 @@
                         <ImageButton
                             Padding="8"
                             BackgroundColor="Transparent"
-                            Source="menu.png"
+                            Source="list.png"
                             Command="{Binding Source={x:Reference AndroidPage}, Path=ToolbarItems[0].Command}"
                             HorizontalOptions="Center"
                             VerticalOptions="Center" />

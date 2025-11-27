@@ -305,7 +305,7 @@
                     <!-- Left: toggle playlist -->
                     <ImageButton Grid.Column="0"
                                  x:Name="btnTogglePlaylist"
-                                 Source="menu.png"
+                                 Source="list.png"
                                  BackgroundColor="Transparent"
                                  HeightRequest="26"
                                  WidthRequest="26"
