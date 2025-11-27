@@ -4,23 +4,36 @@ using SiMP3.Models;
 using SiMP3.Services;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Linq;
 
 namespace SiMP3;
 
-public partial class AndroidMainPage : TabbedPage
+public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
 {
     private readonly MusicController _controller;
     private bool _autoImportAttempted;
+    private bool _isUpdatingSelection;
 
 
+    private string _selectedTab = string.Empty;
     public ObservableCollection<TrackModel> Tracks => _controller.Tracks;
+    public ObservableCollection<string> Tabs { get; } = new(new[] { "All", "Artists", "Albums", "Playlists" });
+
+    public string SelectedTab
+    {
+        get => _selectedTab;
+        set => SetProperty(ref _selectedTab, value);
+    }
 
     public AndroidMainPage()
     {
         InitializeComponent();
 
         _controller = new MusicController(AudioManager.Current);
+        SelectedTab = Tabs.First();
         BindingContext = this;
 
         ToolbarItems.Add(new ToolbarItem
@@ -82,6 +95,10 @@ public partial class AndroidMainPage : TabbedPage
         PlayerTimeStart.Text = "0:00";
         PlayerTimeEnd.Text = t.DurationString;
         PlayerProgressSlider.Value = 0;
+
+        _isUpdatingSelection = true;
+        PlaylistView.SelectedItem = t;
+        _isUpdatingSelection = false;
     }
 
     // ================= PLAY / PAUSE =================
@@ -150,6 +167,9 @@ public partial class AndroidMainPage : TabbedPage
     // ================= PLAYLIST SELECTION =================
     private void OnTrackSelected(object sender, SelectionChangedEventArgs e)
     {
+        if (_isUpdatingSelection)
+            return;
+
         if (e.CurrentSelection?.FirstOrDefault() is TrackModel track)
         {
             _controller.PlayTrack(track);
@@ -159,9 +179,19 @@ public partial class AndroidMainPage : TabbedPage
     // ================= MINI PLAYER TAP =================
     private void OnMiniPlayerTapped(object sender, TappedEventArgs e)
     {
-        // Перехід на вкладку Player
-        if (Children.Count > 1)
-            CurrentPage = Children[1];
+        FullPlayerOverlay.IsVisible = true;
+    }
+
+    private void OnCloseFullPlayer(object sender, EventArgs e)
+        => FullPlayerOverlay.IsVisible = false;
+
+    // ================= TAB SWITCHER =================
+    private void OnTabSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection?.FirstOrDefault() is string tab)
+        {
+            SelectedTab = tab;
+        }
     }
     private async Task ShowSortMenuAsync()
     {
@@ -182,4 +212,22 @@ public partial class AndroidMainPage : TabbedPage
         _controller.SetSortMode(mode);
     }
 
+    // ================= PROPERTY CHANGED =================
+    public new event PropertyChangedEventHandler? PropertyChanged;
+
+    protected bool SetProperty<T>(ref T backingStore, T value, [CallerMemberName] string propertyName = "", Action? onChanged = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(backingStore, value))
+            return false;
+
+        backingStore = value;
+        onChanged?.Invoke();
+        OnPropertyChanged(propertyName);
+        return true;
+    }
+
+    protected new void OnPropertyChanged([CallerMemberName] string propertyName = "")
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 }
