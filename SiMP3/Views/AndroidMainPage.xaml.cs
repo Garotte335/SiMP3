@@ -93,6 +93,12 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
         PlayerTimeStart.Text = "0:00";
         PlayerTimeEnd.Text = t.DurationString;
         PlayerProgressSlider.Value = 0;
+
+        Dispatcher.Dispatch(() =>
+        {
+            PlaylistView.SelectedItem = null;
+            PlaylistView.SelectedItem = t;
+        });
     }
 
     // ================= PLAY / PAUSE =================

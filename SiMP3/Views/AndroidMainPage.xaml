@@ -340,13 +340,16 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0" Padding="16,18,16,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+            <Grid Grid.Row="0" Padding="16,18,16,12" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                 <ImageButton
                     Source="close.png"
                     BackgroundColor="Transparent"
                     HeightRequest="28"
                     WidthRequest="28"
-                    Clicked="OnCloseFullPlayer" />
+                    Clicked="OnCloseFullPlayer"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center" />
+
                 <Label
                     Grid.Column="1"
                     Text="Now Playing"
@@ -355,9 +358,11 @@
                     VerticalOptions="Center"
                     HorizontalOptions="Center"
                     TextColor="{StaticResource PrimaryTextColor}" />
+
+                <BoxView Grid.Column="2" WidthRequest="28" HeightRequest="28" BackgroundColor="Transparent" />
             </Grid>
 
-            <VerticalStackLayout Grid.Row="1" Spacing="18" Padding="28,0,28,24" HorizontalOptions="Center">
+            <VerticalStackLayout Grid.Row="1" Spacing="0" Padding="28,6,28,28" HorizontalOptions="Center">
                 <Border
                     BackgroundColor="{StaticResource SurfaceColor}"
                     Stroke="{StaticResource BorderColor}"
@@ -374,7 +379,7 @@
                         VerticalOptions="Center" />
                 </Border>
 
-                <VerticalStackLayout Spacing="4" HorizontalOptions="Center" WidthRequest="320">
+                <VerticalStackLayout Spacing="4" HorizontalOptions="Center" WidthRequest="320" Margin="0,28,0,0">
                     <Label
                         x:Name="PlayerTitle"
                         FontSize="20"
@@ -390,7 +395,7 @@
                         LineBreakMode="TailTruncation" />
                 </VerticalStackLayout>
 
-                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" WidthRequest="320">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" WidthRequest="320" Margin="0,22,0,0">
                     <Label
                         x:Name="PlayerTimeStart"
                         Text="0:00"
@@ -416,7 +421,7 @@
                         VerticalOptions="Center" />
                 </Grid>
 
-                <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="20" HorizontalOptions="Center" WidthRequest="300">
+                <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="20" HorizontalOptions="Center" WidthRequest="300" Margin="0,24,0,0">
                     <ImageButton
                         x:Name="PlayerShuffleBtn"
                         Source="shuffle.png"
