@@ -204,7 +204,6 @@
                                         BackgroundColor="{StaticResource CardColor}"
                                         Stroke="{StaticResource BorderColor}"
                                         StrokeThickness="1"
-                                        StrokeShape="RoundRectangle 16"
                                         Padding="12"
                                         HeightRequest="72">
                                         <Border.StrokeShape>
