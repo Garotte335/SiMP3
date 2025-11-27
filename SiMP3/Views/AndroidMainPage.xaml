@@ -1,33 +1,30 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
     x:Class="SiMP3.AndroidMainPage"
+    x:Name="AndroidPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:models="clr-namespace:SiMP3.Models"
     BackgroundColor="{StaticResource PageBackgroundColor}">
 
-    <!-- Color and style tokens for the Android layout -->
     <ContentPage.Resources>
         <ResourceDictionary>
-            <Color x:Key="PageBackgroundColor">#121212</Color>
-            <Color x:Key="SurfaceColor">#1E1E1E</Color>
-            <Color x:Key="CardColor">#1E1E1E</Color>
-            <Color x:Key="CardElevatedColor">#262626</Color>
+            <Color x:Key="PageBackgroundColor">#0D0D0D</Color>
+            <Color x:Key="SurfaceColor">#121212</Color>
+            <Color x:Key="CardColor">#161616</Color>
+            <Color x:Key="BorderColor">#1F1F1F</Color>
             <Color x:Key="AccentColor">#3A57E8</Color>
-            <Color x:Key="MutedTextColor">#B0B0B0</Color>
             <Color x:Key="PrimaryTextColor">#FFFFFF</Color>
-            <Color x:Key="BorderColor">#2A2A2A</Color>
-            <Color x:Key="ShadowColor">#33000000</Color>
+            <Color x:Key="MutedTextColor">#B0B0B0</Color>
 
             <Style x:Key="TabLabelStyle" TargetType="Label">
                 <Setter Property="FontSize" Value="14" />
-                <Setter Property="FontAttributes" Value="Bold" />
                 <Setter Property="HorizontalOptions" Value="Center" />
                 <Setter Property="VerticalOptions" Value="Center" />
                 <Setter Property="TextColor" Value="{StaticResource MutedTextColor}" />
             </Style>
 
-            <Style TargetType="Entry" x:Key="SearchEntryStyle">
+            <Style x:Key="SearchEntryStyle" TargetType="Entry">
                 <Setter Property="BackgroundColor" Value="Transparent" />
                 <Setter Property="TextColor" Value="{StaticResource PrimaryTextColor}" />
                 <Setter Property="PlaceholderColor" Value="{StaticResource MutedTextColor}" />
@@ -36,450 +33,435 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <Grid RowSpacing="14">
+    <Grid RowSpacing="10" BackgroundColor="{StaticResource PageBackgroundColor}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- ============== TOP HEADER: title, search bar, settings button ============== -->
-        <Border
-            Grid.Row="0"
-            Padding="16,28,16,12"
-            BackgroundColor="{StaticResource PageBackgroundColor}">
-            <Border.Shadow>
-                <Shadow Radius="10" Offset="0,4" Opacity="0.12" Brush="{StaticResource ShadowColor}" />
-            </Border.Shadow>
-            <Border
-                BackgroundColor="{StaticResource CardColor}"
-                Padding="14"
-                StrokeShape="RoundRectangle 18">
-                <Border.Shadow>
-                    <Shadow Radius="12" Offset="0,6" Opacity="0.1" Brush="{StaticResource ShadowColor}" />
-                </Border.Shadow>
-                <Grid ColumnDefinitions="Auto,*,Auto" HeightRequest="68">
-                    <Label
-                        Grid.Column="0"
-                        Text="SiMP3"
-                        FontSize="24"
-                        VerticalOptions="Center"
-                        FontAttributes="Bold"
-                        TextColor="{StaticResource PrimaryTextColor}" />
+        <!-- HEADER -->
+        <Grid Grid.Row="0" Padding="16,12" BackgroundColor="{StaticResource PageBackgroundColor}" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+            <Label
+                Text="SiMP3"
+                FontSize="22"
+                FontAttributes="Bold"
+                VerticalOptions="Center"
+                TextColor="{StaticResource PrimaryTextColor}" />
 
+            <Border
+                Grid.Column="1"
+                BackgroundColor="{StaticResource SurfaceColor}"
+                Stroke="{StaticResource BorderColor}"
+                StrokeThickness="1"
+                Padding="12,8"
+                StrokeShape="RoundRectangle 20"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                WidthRequest="220">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalOptions="Center">
+                    <Label
+                        Text="🔍"
+                        FontSize="14"
+                        VerticalOptions="Center"
+                        TextColor="{StaticResource MutedTextColor}" />
+                    <Entry
+                        Style="{StaticResource SearchEntryStyle}"
+                        Placeholder="Search"
+                        HorizontalOptions="Fill"
+                        BackgroundColor="Transparent" />
+                </Grid>
+            </Border>
+
+            <Border
+                Grid.Column="2"
+                WidthRequest="32"
+                HeightRequest="32"
+                BackgroundColor="{StaticResource SurfaceColor}"
+                Stroke="{StaticResource BorderColor}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 16"
+                HorizontalOptions="End"
+                VerticalOptions="Center"
+                Padding="6">
+                <Image
+                    Source="menu.png"
+                    Aspect="AspectFit"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+            </Border>
+        </Grid>
+
+        <!-- TAB SWITCHER -->
+        <Grid Grid.Row="1" Padding="16,0,16,8" BackgroundColor="{StaticResource PageBackgroundColor}">
+            <CollectionView
+                x:Name="TabStrip"
+                ItemsSource="{Binding Tabs}"
+                SelectionMode="Single"
+                SelectedItem="{Binding SelectedTab, Mode=TwoWay}"
+                HorizontalScrollBarVisibility="Never"
+                HeightRequest="44"
+                SelectionChanged="OnTabSelectionChanged">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Horizontal" ItemSpacing="18" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="4,6" RowDefinitions="Auto,Auto" RowSpacing="6" HorizontalOptions="Center">
+                            <Label
+                                x:Name="TabLabel"
+                                Text="{Binding .}"
+                                Style="{StaticResource TabLabelStyle}" />
+                            <BoxView
+                                x:Name="TabIndicator"
+                                Grid.Row="1"
+                                HeightRequest="3"
+                                WidthRequest="24"
+                                HorizontalOptions="Center"
+                                BackgroundColor="Transparent"
+                                CornerRadius="2" />
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup Name="CommonStates">
+                                    <VisualState Name="Normal">
+                                        <VisualState.Setters>
+                                            <Setter TargetName="TabLabel" Property="Label.TextColor" Value="{StaticResource MutedTextColor}" />
+                                            <Setter TargetName="TabIndicator" Property="BoxView.BackgroundColor" Value="Transparent" />
+                                            <Setter TargetName="TabLabel" Property="Label.FontAttributes" Value="None" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState Name="Selected">
+                                        <VisualState.Setters>
+                                            <Setter TargetName="TabLabel" Property="Label.TextColor" Value="{StaticResource PrimaryTextColor}" />
+                                            <Setter TargetName="TabLabel" Property="Label.FontAttributes" Value="Bold" />
+                                            <Setter TargetName="TabIndicator" Property="BoxView.BackgroundColor" Value="{StaticResource AccentColor}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+
+        <!-- MAIN CONTENT AREA -->
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid Padding="16,0,16,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Padding="4,4,4,10" VerticalOptions="Center">
+                    <Label
+                        Text="Library"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource PrimaryTextColor}"
+                        VerticalOptions="Center" />
                     <Border
                         Grid.Column="1"
-                        BackgroundColor="{StaticResource BorderColor}"
-                        StrokeShape="RoundRectangle 24"
-                        Padding="14,10"
-                        HorizontalOptions="Fill"
-                        VerticalOptions="Center">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalOptions="Center">
-                            <Label
-                                Text="🔍"
-                                FontSize="16"
-                                VerticalOptions="Center"
-                                TextColor="{StaticResource MutedTextColor}" />
-                            <Entry
-                                Style="{StaticResource SearchEntryStyle}"
-                                Placeholder="Search…"
-                                HorizontalOptions="Fill"
-                                BackgroundColor="Transparent" />
-                        </Grid>
-                    </Border>
-
-                    <Border
-                        Grid.Column="2"
                         WidthRequest="36"
                         HeightRequest="36"
-                        Padding="8"
-                        BackgroundColor="{StaticResource BorderColor}"
+                        BackgroundColor="{StaticResource SurfaceColor}"
+                        Stroke="{StaticResource BorderColor}"
+                        StrokeThickness="1"
                         StrokeShape="RoundRectangle 18"
                         HorizontalOptions="End"
                         VerticalOptions="Center">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer />
-                        </Border.GestureRecognizers>
-                        <Image
+                        <ImageButton
+                            Padding="8"
+                            BackgroundColor="Transparent"
                             Source="menu.png"
-                            Aspect="AspectFit"
+                            Command="{Binding Source={x:Reference AndroidPage}, Path=ToolbarItems[0].Command}"
                             HorizontalOptions="Center"
-                            VerticalOptions="Center"
-                            WidthRequest="20"
-                            HeightRequest="20" />
+                            VerticalOptions="Center" />
                     </Border>
                 </Grid>
-            </Border>
-        </Border>
-
-        <!-- ============== SAMSUNG-STYLE TAB SWITCHER ============== -->
-        <Grid Grid.Row="1" Padding="16,0,16,6">
-            <Border
-                BackgroundColor="{StaticResource SurfaceColor}"
-                StrokeShape="RoundRectangle 16"
-                Stroke="{StaticResource BorderColor}"
-                Padding="12,8">
-                <Border.Shadow>
-                    <Shadow Radius="10" Offset="0,4" Opacity="0.08" Brush="{StaticResource ShadowColor}" />
-                </Border.Shadow>
 
                 <CollectionView
-                    x:Name="TabStrip"
-                    ItemsSource="{Binding Tabs}"
+                    x:Name="PlaylistView"
+                    Grid.Row="1"
+                    ItemsSource="{Binding Tracks}"
                     SelectionMode="Single"
-                    SelectedItem="{Binding SelectedTab, Mode=TwoWay}"
-                    HorizontalScrollBarVisibility="Never"
-                    HeightRequest="48"
-                    SelectionChanged="OnTabSelectionChanged">
+                    SelectionChanged="OnTrackSelected"
+                    SelectionChangedCommand="{x:Null}"
+                    Margin="0,0,0,90">
                     <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8" />
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Padding="14,8" ColumnDefinitions="Auto" RowDefinitions="Auto,Auto" RowSpacing="6">
-                                <Label
-                                    x:Name="TabLabel"
-                                    Text="{Binding .}"
-                                    Style="{StaticResource TabLabelStyle}" />
-                                <BoxView
-                                    x:Name="TabIndicator"
-                                    Grid.Row="1"
-                                    HeightRequest="3"
-                                    HorizontalOptions="Fill"
-                                    BackgroundColor="Transparent"
-                                    CornerRadius="2" />
+                        <DataTemplate x:DataType="models:TrackModel">
+                            <Border
+                                BackgroundColor="{StaticResource CardColor}"
+                                Stroke="{StaticResource BorderColor}"
+                                StrokeThickness="1"
+                                Padding="12"
+                                HeightRequest="76"
+                                StrokeShape="RoundRectangle 14">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalOptions="Center">
+                                    <Border
+                                        WidthRequest="52"
+                                        HeightRequest="52"
+                                        BackgroundColor="{StaticResource BorderColor}"
+                                        StrokeShape="RoundRectangle 12"
+                                        StrokeThickness="0">
+                                        <Image Source="{Binding Cover}" Aspect="AspectFill" />
+                                    </Border>
+
+                                    <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                        <Label
+                                            Text="{Binding Title}"
+                                            FontSize="14"
+                                            FontAttributes="Bold"
+                                            TextColor="{StaticResource PrimaryTextColor}"
+                                            LineBreakMode="TailTruncation" />
+                                        <Label
+                                            Text="{Binding Artist}"
+                                            FontSize="12"
+                                            TextColor="{StaticResource MutedTextColor}"
+                                            LineBreakMode="TailTruncation" />
+                                    </VerticalStackLayout>
+
+                                    <Label
+                                        Grid.Column="2"
+                                        Text="{Binding DurationString}"
+                                        FontSize="12"
+                                        TextColor="{StaticResource MutedTextColor}"
+                                        VerticalOptions="Center"
+                                        HorizontalOptions="End" />
+                                </Grid>
 
                                 <VisualStateManager.VisualStateGroups>
                                     <VisualStateGroup Name="CommonStates">
                                         <VisualState Name="Normal">
                                             <VisualState.Setters>
-                                                <Setter TargetName="TabLabel" Property="Label.TextColor" Value="{StaticResource MutedTextColor}" />
-                                                <Setter TargetName="TabIndicator" Property="BoxView.BackgroundColor" Value="Transparent" />
+                                                <Setter Property="BackgroundColor" Value="{StaticResource CardColor}" />
+                                                <Setter Property="Stroke" Value="{StaticResource BorderColor}" />
                                             </VisualState.Setters>
                                         </VisualState>
                                         <VisualState Name="Selected">
                                             <VisualState.Setters>
-                                                <Setter TargetName="TabLabel" Property="Label.TextColor" Value="{StaticResource PrimaryTextColor}" />
-                                                <Setter TargetName="TabLabel" Property="Label.FontAttributes" Value="Bold" />
-                                                <Setter TargetName="TabIndicator" Property="BoxView.BackgroundColor" Value="{StaticResource AccentColor}" />
+                                                <Setter Property="BackgroundColor" Value="#1E2335" />
+                                                <Setter Property="Stroke" Value="{StaticResource AccentColor}" />
                                             </VisualState.Setters>
                                         </VisualState>
                                     </VisualStateGroup>
                                 </VisualStateManager.VisualStateGroups>
-                            </Grid>
+                            </Border>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
+            </Grid>
 
-            </Border>
-        </Grid>
-
-        <!-- ============== MAIN CONTENT: track list ============== -->
-        <ScrollView Grid.Row="2" x:Name="MainScroll" VerticalOptions="FillAndExpand" Padding="16,0,16,12">
-            <VerticalStackLayout Spacing="14">
-                <Border BackgroundColor="{StaticResource SurfaceColor}" StrokeShape="RoundRectangle 18" Padding="0" Stroke="{StaticResource BorderColor}">
-                    <Grid RowDefinitions="Auto,*" RowSpacing="0">
-                        <Label
-                            Text="Library"
-                            Padding="18,14"
-                            FontSize="16"
-                            FontAttributes="Bold"
-                            TextColor="{StaticResource PrimaryTextColor}" />
-
-                        <CollectionView
-                            x:Name="PlaylistView"
-                            Grid.Row="1"
-                            ItemsSource="{Binding Tracks}"
-                            SelectionMode="Single"
-                            SelectionChanged="OnTrackSelected"
-                            Margin="0,0,0,6"
-                            SelectionChangedCommand="{x:Null}">
-                            <CollectionView.ItemsLayout>
-                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
-                            </CollectionView.ItemsLayout>
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="models:TrackModel">
-                                    <Border
-                                        BackgroundColor="{StaticResource CardColor}"
-                                        Stroke="{StaticResource BorderColor}"
-                                        StrokeThickness="1"
-                                        Padding="12"
-                                        HeightRequest="72">
-                                        <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="16" />
-                                        </Border.StrokeShape>
-                                        <Border.Shadow>
-                                            <Shadow Radius="10" Offset="0,4" Opacity="0.04" Brush="{StaticResource ShadowColor}" />
-                                        </Border.Shadow>
-
-                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalOptions="Center">
-                                            <Frame
-                                                WidthRequest="48"
-                                                HeightRequest="48"
-                                                Padding="0"
-                                                CornerRadius="12"
-                                                HasShadow="False"
-                                                BackgroundColor="{StaticResource BorderColor}">
-                                                <Image Source="{Binding Cover}" Aspect="AspectFill" />
-                                            </Frame>
-
-                                            <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
-                                                <Label
-                                                    Text="{Binding Title}"
-                                                    FontSize="14"
-                                                    FontAttributes="Bold"
-                                                    TextColor="{StaticResource PrimaryTextColor}"
-                                                    LineBreakMode="TailTruncation" />
-                                                <Label
-                                                    Text="{Binding Artist}"
-                                                    FontSize="12"
-                                                    TextColor="{StaticResource MutedTextColor}"
-                                                    LineBreakMode="TailTruncation" />
-                                            </VerticalStackLayout>
-
-                                            <BoxView Grid.Column="2" WidthRequest="6" BackgroundColor="Transparent" x:Name="AccentGlow" VerticalOptions="Center" />
-                                        </Grid>
-
-                                        <VisualStateManager.VisualStateGroups>
-                                            <VisualStateGroup Name="CommonStates">
-                                                <VisualState Name="Normal">
-                                                    <VisualState.Setters>
-                                                        <Setter Property="BackgroundColor" Value="{StaticResource CardColor}" />
-                                                        <Setter Property="Stroke" Value="{StaticResource BorderColor}" />
-                                                        <Setter TargetName="AccentGlow" Property="BoxView.BackgroundColor" Value="Transparent" />
-                                                    </VisualState.Setters>
-                                                </VisualState>
-                                                <VisualState Name="Selected">
-                                                    <VisualState.Setters>
-                                                        <Setter Property="BackgroundColor" Value="{StaticResource CardElevatedColor}" />
-                                                        <Setter Property="Stroke" Value="{StaticResource AccentColor}" />
-                                                        <Setter TargetName="AccentGlow" Property="BoxView.BackgroundColor" Value="#663A57E8" />
-                                                    </VisualState.Setters>
-                                                </VisualState>
-                                            </VisualStateGroup>
-                                        </VisualStateManager.VisualStateGroups>
-                                    </Border>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-                    </Grid>
-                </Border>
-            </VerticalStackLayout>
-        </ScrollView>
-
-        <!-- ============== MINI PLAYER: pinned bottom ============== -->
-        <Grid Grid.Row="3" Padding="16,0,16,16" BackgroundColor="{StaticResource PageBackgroundColor}">
-            <Border
-                x:Name="MiniPlayerBar"
-                Padding="12"
-                BackgroundColor="{StaticResource SurfaceColor}"
-                StrokeShape="RoundRectangle 18"
-                Stroke="{StaticResource BorderColor}"
-                HeightRequest="56"
-                IsVisible="False">
-                <Border.Shadow>
-                    <Shadow Radius="12" Offset="0,4" Opacity="0.08" Brush="{StaticResource ShadowColor}" />
-                </Border.Shadow>
-                <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="12" VerticalOptions="Center">
-                    <Frame
-                        WidthRequest="40"
-                        HeightRequest="40"
-                        Padding="0"
-                        CornerRadius="10"
-                        BackgroundColor="{StaticResource BorderColor}"
-                        HasShadow="False">
-                        <Image
-                            x:Name="MiniCover"
-                            Aspect="AspectFill"
-                            HorizontalOptions="Center"
-                            VerticalOptions="Center" />
-                    </Frame>
-
-                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                        <Label
-                            x:Name="MiniTitle"
-                            FontSize="13"
-                            FontAttributes="Bold"
-                            TextColor="{StaticResource PrimaryTextColor}"
-                            LineBreakMode="TailTruncation" />
-                        <Label
-                            x:Name="MiniArtist"
-                            FontSize="11"
-                            TextColor="{StaticResource MutedTextColor}"
-                            LineBreakMode="TailTruncation" />
-                    </VerticalStackLayout>
-
-                    <ImageButton
-                        Grid.Column="2"
-                        Source="prev.png"
-                        BackgroundColor="Transparent"
-                        HeightRequest="28"
-                        WidthRequest="28"
-                        Clicked="OnPrevClicked" />
-
-                    <ImageButton
-                        Grid.Column="3"
-                        x:Name="MiniPlayPauseBtn"
-                        Source="play_btn.png"
-                        BackgroundColor="Transparent"
-                        HeightRequest="32"
-                        WidthRequest="32"
-                        Clicked="OnPlayPauseClicked" />
-
-                    <ImageButton
-                        Grid.Column="4"
-                        Source="next.png"
-                        BackgroundColor="Transparent"
-                        HeightRequest="28"
-                        WidthRequest="28"
-                        Clicked="OnNextClicked" />
-                </Grid>
-
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnMiniPlayerTapped" />
-                </Border.GestureRecognizers>
-            </Border>
-        </Grid>
-
-        <!-- ============== FULL PLAYER MODAL ============== -->
-        <Grid x:Name="FullPlayerOverlay" Grid.RowSpan="4" BackgroundColor="#CC121212" IsVisible="False">
-            <Border
-                x:Name="PlayerSection"
-                Margin="16"
-                Padding="18"
-                BackgroundColor="{StaticResource SurfaceColor}"
-                StrokeShape="RoundRectangle 22"
-                Stroke="{StaticResource BorderColor}">
-                <Border.Shadow>
-                    <Shadow Radius="18" Offset="0,12" Opacity="0.18" Brush="{StaticResource ShadowColor}" />
-                </Border.Shadow>
-
-                <Grid RowDefinitions="Auto,*,Auto" RowSpacing="18">
-                    <Grid Grid.Row="0" ColumnDefinitions="Auto,*" ColumnSpacing="12" VerticalOptions="Center">
-                        <ImageButton
-                            Source="close.png"
-                            BackgroundColor="Transparent"
-                            HeightRequest="28"
-                            WidthRequest="28"
-                            Clicked="OnCloseFullPlayer" />
-                        <Label
-                            Grid.Column="1"
-                            Text="Now Playing"
-                            FontSize="16"
-                            FontAttributes="Bold"
-                            VerticalOptions="Center"
-                            TextColor="{StaticResource PrimaryTextColor}" />
-                    </Grid>
-
-                    <VerticalStackLayout Grid.Row="1" Spacing="16">
-                        <Frame
+            <!-- MINI PLAYER -->
+            <Grid Padding="16" VerticalOptions="End" HorizontalOptions="Fill" RowSpacing="0">
+                <Border
+                    x:Name="MiniPlayerBar"
+                    Padding="10"
+                    BackgroundColor="{StaticResource SurfaceColor}"
+                    Stroke="{StaticResource BorderColor}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 18"
+                    HeightRequest="64"
+                    IsVisible="False"
+                    TranslationY="6"
+                    Margin="0,0,0,4">
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="12" VerticalOptions="Center">
+                        <Border
+                            WidthRequest="44"
+                            HeightRequest="44"
                             BackgroundColor="{StaticResource BorderColor}"
-                            CornerRadius="24"
-                            Padding="16"
-                            HasShadow="False"
-                            HeightRequest="280">
+                            StrokeShape="RoundRectangle 10"
+                            StrokeThickness="0"
+                            VerticalOptions="Center">
                             <Image
-                                x:Name="PlayerCover"
-                                Aspect="AspectFit"
+                                x:Name="MiniCover"
+                                Aspect="AspectFill"
                                 HorizontalOptions="Center"
                                 VerticalOptions="Center" />
-                        </Frame>
+                        </Border>
 
-                        <VerticalStackLayout Spacing="4" Margin="4,0,4,0">
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
                             <Label
-                                x:Name="PlayerTitle"
-                                FontSize="20"
+                                x:Name="MiniTitle"
+                                FontSize="13"
                                 FontAttributes="Bold"
                                 TextColor="{StaticResource PrimaryTextColor}"
                                 LineBreakMode="TailTruncation" />
                             <Label
-                                x:Name="PlayerArtist"
-                                FontSize="14"
+                                x:Name="MiniArtist"
+                                FontSize="11"
                                 TextColor="{StaticResource MutedTextColor}"
                                 LineBreakMode="TailTruncation" />
                         </VerticalStackLayout>
 
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                            <Label
-                                x:Name="PlayerTimeStart"
-                                Text="0:00"
-                                FontSize="11"
-                                TextColor="{StaticResource MutedTextColor}"
-                                VerticalOptions="Center" />
-                            <Slider
-                                x:Name="PlayerProgressSlider"
-                                Grid.Column="1"
-                                Minimum="0"
-                                Maximum="1"
-                                ThumbColor="{StaticResource AccentColor}"
-                                MinimumTrackColor="{StaticResource AccentColor}"
-                                MaximumTrackColor="#2A2A2A"
-                                ValueChanged="OnSeekChanged" />
-                            <Label
-                                x:Name="PlayerTimeEnd"
-                                Grid.Column="2"
-                                Text="0:00"
-                                FontSize="11"
-                                TextColor="{StaticResource MutedTextColor}"
-                                HorizontalOptions="End"
-                                VerticalOptions="Center" />
-                        </Grid>
+                        <ImageButton
+                            Grid.Column="2"
+                            Source="prev.png"
+                            BackgroundColor="Transparent"
+                            HeightRequest="28"
+                            WidthRequest="28"
+                            Clicked="OnPrevClicked" />
 
-                        <Grid
-                            ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
-                            ColumnSpacing="18"
-                            Margin="0,4,0,0"
-                            HorizontalOptions="Center"
-                            VerticalOptions="Center">
-                            <ImageButton
-                                Grid.Column="1"
-                                x:Name="PlayerShuffleBtn"
-                                Source="shuffle.png"
-                                BackgroundColor="Transparent"
-                                Opacity="0.5"
-                                HeightRequest="30"
-                                WidthRequest="30"
-                                Clicked="OnShuffleClicked" />
+                        <ImageButton
+                            Grid.Column="3"
+                            x:Name="MiniPlayPauseBtn"
+                            Source="play_btn.png"
+                            BackgroundColor="Transparent"
+                            HeightRequest="32"
+                            WidthRequest="32"
+                            Clicked="OnPlayPauseClicked" />
 
-                            <ImageButton
-                                Grid.Column="2"
-                                Source="prev.png"
-                                BackgroundColor="Transparent"
-                                HeightRequest="38"
-                                WidthRequest="38"
-                                Clicked="OnPrevClicked" />
+                        <ImageButton
+                            Grid.Column="4"
+                            Source="next.png"
+                            BackgroundColor="Transparent"
+                            HeightRequest="28"
+                            WidthRequest="28"
+                            Clicked="OnNextClicked" />
+                    </Grid>
 
-                            <ImageButton
-                                Grid.Column="3"
-                                x:Name="PlayerPlayPauseBtn"
-                                Source="play_btn.png"
-                                BackgroundColor="Transparent"
-                                HeightRequest="52"
-                                WidthRequest="52"
-                                Clicked="OnPlayPauseClicked" />
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnMiniPlayerTapped" />
+                    </Border.GestureRecognizers>
+                </Border>
+            </Grid>
+        </Grid>
 
-                            <ImageButton
-                                Grid.Column="4"
-                                Source="next.png"
-                                BackgroundColor="Transparent"
-                                HeightRequest="38"
-                                WidthRequest="38"
-                                Clicked="OnNextClicked" />
+        <!-- FULL PLAYER OVERLAY -->
+        <Grid x:Name="FullPlayerOverlay" Grid.RowSpan="3" BackgroundColor="#CC0D0D0D" IsVisible="False">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-                            <ImageButton
-                                Grid.Column="5"
-                                x:Name="PlayerRepeatBtn"
-                                Source="repeat.png"
-                                BackgroundColor="Transparent"
-                                Opacity="0.5"
-                                HeightRequest="30"
-                                WidthRequest="30"
-                                Clicked="OnRepeatClicked" />
-                        </Grid>
-                    </VerticalStackLayout>
+            <Grid Grid.Row="0" Padding="16,18,16,10" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                <ImageButton
+                    Source="close.png"
+                    BackgroundColor="Transparent"
+                    HeightRequest="28"
+                    WidthRequest="28"
+                    Clicked="OnCloseFullPlayer" />
+                <Label
+                    Grid.Column="1"
+                    Text="Now Playing"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center"
+                    TextColor="{StaticResource PrimaryTextColor}" />
+            </Grid>
+
+            <VerticalStackLayout Grid.Row="1" Spacing="18" Padding="28,0,28,24" HorizontalOptions="Center">
+                <Border
+                    BackgroundColor="{StaticResource SurfaceColor}"
+                    Stroke="{StaticResource BorderColor}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 22"
+                    WidthRequest="300"
+                    HeightRequest="300"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center">
+                    <Image
+                        x:Name="PlayerCover"
+                        Aspect="AspectFill"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <VerticalStackLayout Spacing="4" HorizontalOptions="Center" WidthRequest="320">
+                    <Label
+                        x:Name="PlayerTitle"
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{StaticResource PrimaryTextColor}"
+                        LineBreakMode="TailTruncation" />
+                    <Label
+                        x:Name="PlayerArtist"
+                        FontSize="14"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{StaticResource MutedTextColor}"
+                        LineBreakMode="TailTruncation" />
+                </VerticalStackLayout>
+
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" WidthRequest="320">
+                    <Label
+                        x:Name="PlayerTimeStart"
+                        Text="0:00"
+                        FontSize="11"
+                        TextColor="{StaticResource MutedTextColor}"
+                        VerticalOptions="Center" />
+                    <Slider
+                        x:Name="PlayerProgressSlider"
+                        Grid.Column="1"
+                        Minimum="0"
+                        Maximum="1"
+                        ThumbColor="{StaticResource AccentColor}"
+                        MinimumTrackColor="{StaticResource AccentColor}"
+                        MaximumTrackColor="#2A2A2A"
+                        ValueChanged="OnSeekChanged" />
+                    <Label
+                        x:Name="PlayerTimeEnd"
+                        Grid.Column="2"
+                        Text="0:00"
+                        FontSize="11"
+                        TextColor="{StaticResource MutedTextColor}"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center" />
                 </Grid>
-            </Border>
+
+                <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="20" HorizontalOptions="Center" WidthRequest="300">
+                    <ImageButton
+                        x:Name="PlayerShuffleBtn"
+                        Source="shuffle.png"
+                        BackgroundColor="Transparent"
+                        Opacity="0.5"
+                        HeightRequest="30"
+                        WidthRequest="30"
+                        Clicked="OnShuffleClicked" />
+
+                    <ImageButton
+                        Grid.Column="1"
+                        Source="prev.png"
+                        BackgroundColor="Transparent"
+                        HeightRequest="36"
+                        WidthRequest="36"
+                        Clicked="OnPrevClicked" />
+
+                    <ImageButton
+                        Grid.Column="2"
+                        x:Name="PlayerPlayPauseBtn"
+                        Source="play_btn.png"
+                        BackgroundColor="Transparent"
+                        HeightRequest="56"
+                        WidthRequest="56"
+                        Clicked="OnPlayPauseClicked" />
+
+                    <ImageButton
+                        Grid.Column="3"
+                        Source="next.png"
+                        BackgroundColor="Transparent"
+                        HeightRequest="36"
+                        WidthRequest="36"
+                        Clicked="OnNextClicked" />
+
+                    <ImageButton
+                        Grid.Column="4"
+                        x:Name="PlayerRepeatBtn"
+                        Source="repeat.png"
+                        BackgroundColor="Transparent"
+                        Opacity="0.5"
+                        HeightRequest="30"
+                        WidthRequest="30"
+                        Clicked="OnRepeatClicked" />
+                </Grid>
+            </VerticalStackLayout>
         </Grid>
     </Grid>
 </ContentPage>
