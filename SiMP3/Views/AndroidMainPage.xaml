@@ -52,60 +52,65 @@
             <Border.Shadow>
                 <Shadow Radius="10" Offset="0,4" Opacity="0.12" Brush="{StaticResource ShadowColor}" />
             </Border.Shadow>
-            <Grid ColumnDefinitions="Auto,*,Auto" HeightRequest="68" BackgroundColor="{StaticResource CardColor}" Padding="14" StrokeShape="RoundRectangle 18">
-                <Grid.Shadow>
+            <Border
+                BackgroundColor="{StaticResource CardColor}"
+                Padding="14"
+                StrokeShape="RoundRectangle 18">
+                <Border.Shadow>
                     <Shadow Radius="12" Offset="0,6" Opacity="0.1" Brush="{StaticResource ShadowColor}" />
-                </Grid.Shadow>
-                <Label
-                    Grid.Column="0"
-                    Text="SiMP3"
-                    FontSize="24"
-                    VerticalOptions="Center"
-                    FontAttributes="Bold"
-                    TextColor="{StaticResource PrimaryTextColor}" />
-
-                <Border
-                    Grid.Column="1"
-                    BackgroundColor="{StaticResource BorderColor}"
-                    StrokeShape="RoundRectangle 24"
-                    Padding="14,10"
-                    HorizontalOptions="Fill"
-                    VerticalOptions="Center">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalOptions="Center">
-                        <Label
-                            Text="🔍"
-                            FontSize="16"
-                            VerticalOptions="Center"
-                            TextColor="{StaticResource MutedTextColor}" />
-                        <Entry
-                            Style="{StaticResource SearchEntryStyle}"
-                            Placeholder="Search…"
-                            HorizontalOptions="Fill"
-                            BackgroundColor="Transparent" />
-                    </Grid>
-                </Border>
-
-                <Border
-                    Grid.Column="2"
-                    WidthRequest="36"
-                    HeightRequest="36"
-                    Padding="8"
-                    BackgroundColor="{StaticResource BorderColor}"
-                    StrokeShape="RoundRectangle 18"
-                    HorizontalOptions="End"
-                    VerticalOptions="Center">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer />
-                    </Border.GestureRecognizers>
-                    <Image
-                        Source="menu.png"
-                        Aspect="AspectFit"
-                        HorizontalOptions="Center"
+                </Border.Shadow>
+                <Grid ColumnDefinitions="Auto,*,Auto" HeightRequest="68">
+                    <Label
+                        Grid.Column="0"
+                        Text="SiMP3"
+                        FontSize="24"
                         VerticalOptions="Center"
-                        WidthRequest="20"
-                        HeightRequest="20" />
-                </Border>
-            </Grid>
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource PrimaryTextColor}" />
+
+                    <Border
+                        Grid.Column="1"
+                        BackgroundColor="{StaticResource BorderColor}"
+                        StrokeShape="RoundRectangle 24"
+                        Padding="14,10"
+                        HorizontalOptions="Fill"
+                        VerticalOptions="Center">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" VerticalOptions="Center">
+                            <Label
+                                Text="🔍"
+                                FontSize="16"
+                                VerticalOptions="Center"
+                                TextColor="{StaticResource MutedTextColor}" />
+                            <Entry
+                                Style="{StaticResource SearchEntryStyle}"
+                                Placeholder="Search…"
+                                HorizontalOptions="Fill"
+                                BackgroundColor="Transparent" />
+                        </Grid>
+                    </Border>
+
+                    <Border
+                        Grid.Column="2"
+                        WidthRequest="36"
+                        HeightRequest="36"
+                        Padding="8"
+                        BackgroundColor="{StaticResource BorderColor}"
+                        StrokeShape="RoundRectangle 18"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer />
+                        </Border.GestureRecognizers>
+                        <Image
+                            Source="menu.png"
+                            Aspect="AspectFit"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center"
+                            WidthRequest="20"
+                            HeightRequest="20" />
+                    </Border>
+                </Grid>
+            </Border>
         </Border>
 
         <!-- ============== SAMSUNG-STYLE TAB SWITCHER ============== -->
