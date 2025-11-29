@@ -9,6 +9,7 @@ namespace SiMP3;
 {
     private readonly IPlayerOverlayService _overlayService;
     private readonly MusicController _musicController;
+    private bool _isSearchVisible;
 
     public AppShell()
     {
@@ -24,7 +25,7 @@ namespace SiMP3;
         {
             Route = nameof(AndroidMainPage),
             ContentTemplate = new DataTemplate(() => App.Services.GetRequiredService<AndroidMainPage>()),
-            Title = "Home"
+            Title = "Домівка"
         });
     }
 
@@ -54,6 +55,21 @@ namespace SiMP3;
         if (CurrentPage is AndroidMainPage androidMainPage)
         {
             androidMainPage.ApplyGlobalSearch(query);
+        }
+    }
+
+    private void OnSearchTapped(object sender, EventArgs e)
+    {
+        _isSearchVisible = !_isSearchVisible;
+        SearchBarContainer.IsVisible = _isSearchVisible;
+
+        if (_isSearchVisible)
+        {
+            GlobalSearchBar.Focus();
+        }
+        else
+        {
+            GlobalSearchBar.Text = string.Empty;
         }
     }
 }

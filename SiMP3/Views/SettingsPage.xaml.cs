@@ -11,7 +11,7 @@ namespace SiMP3.Views
         {
             InitializeComponent();
             _playlistService = playlistService;
-            Title = "Settings";
+            Title = "Налаштування";
         }
 
         protected override async void OnAppearing()
@@ -22,17 +22,17 @@ namespace SiMP3.Views
 
         private async void OnClearPlaylists(object sender, EventArgs e)
         {
-            var confirm = await DisplayAlert("Clear playlists", "Remove all playlists including favorites?", "Yes", "No");
+            var confirm = await DisplayAlert("Очистити плейлисти", "Видалити всі плейлисти, включно з улюбленими?", "Так", "Ні");
             if (!confirm)
                 return;
 
             await _playlistService.ClearAll();
-            await DisplayAlert("Done", "Playlists cleared.", "OK");
+            await DisplayAlert("Готово", "Плейлисти очищено.", "OK");
         }
 
         private async void OnCheckUpdates(object sender, EventArgs e)
         {
-            await DisplayAlert("Updates", "Update check will be available soon.", "OK");
+            await DisplayAlert("Оновлення", "Перевірка оновлень скоро буде доступна.", "OK");
         }
     }
 }

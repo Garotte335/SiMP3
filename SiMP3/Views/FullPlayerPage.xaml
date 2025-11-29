@@ -3,15 +3,23 @@
     x:Class="SiMP3.Views.FullPlayerPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    BackgroundColor="#CC0D0D0D"
+    BackgroundColor="#050505"
     Padding="0">
 
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="AccentColor">#C084FC</Color>
+            <Color x:Key="PrimaryTextColor">#FFFFFF</Color>
+            <Color x:Key="MutedTextColor">#B5B5C0</Color>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
     <Grid RowDefinitions="Auto,*" RowSpacing="0" Padding="0" x:Name="RootGrid">
-        <Grid Grid.Row="0" Padding="16,18,16,12" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+        <Grid Grid.Row="0" Padding="20,18,20,12" ColumnDefinitions="*,Auto" ColumnSpacing="12">
 
             <Label
-                Text="Now Playing"
-                FontSize="16"
+                Text="Зараз грає"
+                FontSize="20"
                 FontAttributes="Bold"
                 VerticalOptions="Center"
                 HorizontalOptions="Center"
@@ -29,15 +37,15 @@
                 VerticalOptions="Center" />
         </Grid>
 
-        <Grid Grid.Row="1" RowDefinitions="*,Auto,Auto" RowSpacing="18" Padding="28,6,28,28" HorizontalOptions="Center" VerticalOptions="FillAndExpand">
+        <Grid Grid.Row="1" RowDefinitions="*,Auto,Auto" RowSpacing="20" Padding="28,6,28,28" HorizontalOptions="Center" VerticalOptions="FillAndExpand">
             <Border
                 Grid.Row="0"
-                BackgroundColor="{StaticResource SurfaceColor}"
-                Stroke="{StaticResource BorderColor}"
+                BackgroundColor="#0E0E10"
+                Stroke="#1E2030"
                 StrokeThickness="1"
-                StrokeShape="RoundRectangle 22"
-                WidthRequest="300"
-                HeightRequest="300"
+                StrokeShape="RoundRectangle 24"
+                WidthRequest="320"
+                HeightRequest="320"
                 HorizontalOptions="Center"
                 VerticalOptions="Center">
                 <Image
@@ -47,10 +55,10 @@
                     VerticalOptions="Center" />
             </Border>
 
-            <VerticalStackLayout Grid.Row="1" Spacing="6" HorizontalOptions="Center" WidthRequest="320" Margin="0,8,0,0" VerticalOptions="Start">
+            <VerticalStackLayout Grid.Row="1" Spacing="8" HorizontalOptions="Center" WidthRequest="340" Margin="0,8,0,0" VerticalOptions="Start">
                 <Label
                     x:Name="PlayerTitle"
-                    FontSize="20"
+                    FontSize="22"
                     FontAttributes="Bold"
                     HorizontalTextAlignment="Center"
                     TextColor="{StaticResource PrimaryTextColor}"
@@ -61,7 +69,7 @@
                     HorizontalTextAlignment="Center"
                     TextColor="{StaticResource MutedTextColor}"
                     LineBreakMode="TailTruncation" />
-                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" WidthRequest="320" Margin="0,14,0,0">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" WidthRequest="340" Margin="0,14,0,0">
                     <Label
                         x:Name="PlayerTimeStart"
                         Text="0:00"
@@ -75,56 +83,58 @@
                         Maximum="1"
                         ValueChanged="OnSeekChanged"
                         ThumbColor="{StaticResource AccentColor}"
-                        MaximumTrackColor="#333"
+                        MaximumTrackColor="#292A30"
                         MinimumTrackColor="{StaticResource AccentColor}" />
                     <Label
                         x:Name="PlayerTimeEnd"
                         Grid.Column="2"
                         Text="0:00"
-                        FontSize="11"
+                        FontSize="12"
                         TextColor="{StaticResource MutedTextColor}"
                         VerticalOptions="Center"
                         HorizontalOptions="End" />
                 </Grid>
             </VerticalStackLayout>
 
-            <Grid Grid.Row="2" RowDefinitions="Auto,Auto" RowSpacing="12" VerticalOptions="End" WidthRequest="320">
-                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="18" HorizontalOptions="Center">
+            <Grid Grid.Row="2" RowDefinitions="Auto,Auto" RowSpacing="16" VerticalOptions="End" WidthRequest="340">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="20" HorizontalOptions="Center">
                     <ImageButton
                         x:Name="PlayerShuffleBtn"
                         Source="shuffle.png"
                         BackgroundColor="Transparent"
-                        Opacity="0.5"
+                        Opacity="0.7"
                         Clicked="OnShuffleClicked"
-                        HeightRequest="28"
-                        WidthRequest="28"
+                        HeightRequest="32"
+                        WidthRequest="32"
                         HorizontalOptions="Start" />
 
-                    <Grid Grid.Column="1" ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="16" HorizontalOptions="Center">
+                    <Grid Grid.Column="1" ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="20" HorizontalOptions="Center">
                         <ImageButton
                             Source="prev.png"
                             BackgroundColor="Transparent"
-                            HeightRequest="36"
-                            WidthRequest="36"
+                            HeightRequest="40"
+                            WidthRequest="40"
                             Clicked="OnPrevClicked"
                             HorizontalOptions="Center" />
 
-                        <ImageButton
-                            x:Name="PlayerPlayPauseBtn"
-                            Grid.Column="1"
-                            Source="play_btn.png"
-                            BackgroundColor="Transparent"
-                            HeightRequest="48"
-                            WidthRequest="48"
-                            Clicked="OnPlayPauseClicked"
-                            HorizontalOptions="Center" />
+                        <Border Grid.Column="1" BackgroundColor="#C084FC" StrokeThickness="0" StrokeShape="RoundRectangle 24" WidthRequest="70" HeightRequest="70" HorizontalOptions="Center" VerticalOptions="Center">
+                            <ImageButton
+                                x:Name="PlayerPlayPauseBtn"
+                                Source="play_btn.png"
+                                BackgroundColor="Transparent"
+                                HeightRequest="50"
+                                WidthRequest="50"
+                                Clicked="OnPlayPauseClicked"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
+                        </Border>
 
                         <ImageButton
                             Grid.Column="2"
                             Source="next.png"
                             BackgroundColor="Transparent"
-                            HeightRequest="36"
-                            WidthRequest="36"
+                            HeightRequest="40"
+                            WidthRequest="40"
                             Clicked="OnNextClicked"
                             HorizontalOptions="Center" />
                     </Grid>
@@ -134,21 +144,21 @@
                         x:Name="PlayerRepeatBtn"
                         Source="repeat.png"
                         BackgroundColor="Transparent"
-                        Opacity="0.5"
+                        Opacity="0.7"
                         Clicked="OnRepeatClicked"
-                        HeightRequest="28"
-                        WidthRequest="28"
+                        HeightRequest="32"
+                        WidthRequest="32"
                         HorizontalOptions="End" />
                 </Grid>
 
                 <Border
                     Grid.Row="1"
                     Padding="12"
-                    BackgroundColor="{StaticResource SurfaceColor}"
+                    BackgroundColor="#0E0E10"
                     StrokeShape="RoundRectangle 16"
-                    Stroke="{StaticResource BorderColor}"
+                    Stroke="#1E2030"
                     StrokeThickness="1"
-                    WidthRequest="320"
+                    WidthRequest="340"
                     IsVisible="{OnPlatform Android=False, iOS=False, Default=True}">
                     <Slider
                         x:Name="VolumeSlider"
@@ -157,7 +167,7 @@
                         Value="0.5"
                         ValueChanged="OnVolumeChanged"
                         HeightRequest="30"
-                        MaximumTrackColor="#333"
+                        MaximumTrackColor="#292A30"
                         MinimumTrackColor="{StaticResource AccentColor}" />
                 </Border>
             </Grid>

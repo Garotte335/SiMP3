@@ -47,13 +47,13 @@ namespace SiMP3.Views
             var allTracks = _musicController.GetAllTracksSnapshot().ToList();
             if (allTracks.Count == 0)
             {
-                await DisplayAlert("No tracks", "Library is empty.", "OK");
+                await DisplayAlert("Немає треків", "Бібліотека пуста.", "OK");
                 return;
             }
 
             var titles = allTracks.Select(t => t.Title).ToArray();
-            var selected = await DisplayActionSheet("Add track", "Cancel", null, titles);
-            if (string.IsNullOrWhiteSpace(selected) || selected == "Cancel")
+            var selected = await DisplayActionSheet("Додати трек", "Скасувати", null, titles);
+            if (string.IsNullOrWhiteSpace(selected) || selected == "Скасувати")
                 return;
 
             var track = allTracks.FirstOrDefault(t => t.Title == selected);
@@ -63,9 +63,9 @@ namespace SiMP3.Views
             }
         }
 
-        private async void OnRenameClicked(object sender, EventArgs e)
+        private async void OnTitleTapped(object sender, EventArgs e)
         {
-            var newName = await DisplayPromptAsync("Rename", "New playlist name", "Save", "Cancel", initialValue: _playlist.Name);
+            var newName = await DisplayPromptAsync("Перейменувати", "Нова назва плейлиста", "Зберегти", "Скасувати", initialValue: _playlist.Name);
             if (string.IsNullOrWhiteSpace(newName))
                 return;
 
@@ -75,7 +75,7 @@ namespace SiMP3.Views
 
         private async void OnDeleteClicked(object sender, EventArgs e)
         {
-            var confirm = await DisplayAlert("Delete", $"Delete playlist '{_playlist.Name}'?", "Yes", "No");
+            var confirm = await DisplayAlert("Видалити", $"Видалити плейлист '{_playlist.Name}'?", "Так", "Ні");
             if (!confirm)
                 return;
 

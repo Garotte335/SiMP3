@@ -3,44 +3,46 @@
     x:Class="SiMP3.Views.SettingsPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    BackgroundColor="#0D0D0D">
+    BackgroundColor="#050505">
 
     <ContentPage.Resources>
         <ResourceDictionary>
-            <Color x:Key="SurfaceColor">#121212</Color>
-            <Color x:Key="CardColor">#161616</Color>
-            <Color x:Key="BorderColor">#1F1F1F</Color>
+            <Color x:Key="SurfaceColor">#0E0E10</Color>
+            <Color x:Key="CardColor">#12131A</Color>
+            <Color x:Key="BorderColor">#1E2030</Color>
             <Color x:Key="PrimaryTextColor">#FFFFFF</Color>
-            <Color x:Key="MutedTextColor">#B0B0B0</Color>
+            <Color x:Key="MutedTextColor">#B5B5C0</Color>
         </ResourceDictionary>
     </ContentPage.Resources>
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="18">
-            <Label Text="Settings" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource PrimaryTextColor}" />
+            <Label Text="Налаштування" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource PrimaryTextColor}" />
 
             <Border BackgroundColor="{StaticResource CardColor}" Stroke="{StaticResource BorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="14">
                 <VerticalStackLayout Spacing="8">
-                    <Label Text="About application" FontSize="16" TextColor="{StaticResource PrimaryTextColor}" FontAttributes="Bold" />
-                    <Label Text="SiMP3 music player. Version 1.0. Author: SiMP3 team." TextColor="{StaticResource MutedTextColor}" FontSize="14" />
+                    <Label Text="Про застосунок" FontSize="16" TextColor="{StaticResource PrimaryTextColor}" FontAttributes="Bold" />
+                    <Label Text="Музичний програвач SiMP3. Версія 1.0. Автор: SvD." TextColor="{StaticResource MutedTextColor}" FontSize="14" />
                 </VerticalStackLayout>
             </Border>
 
             <Border BackgroundColor="{StaticResource CardColor}" Stroke="{StaticResource BorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="14">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalOptions="Center">
                     <VerticalStackLayout Spacing="4">
-                        <Label Text="Clear playlists" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource PrimaryTextColor}" />
-                        <Label Text="Remove all saved playlists, including Favorites." TextColor="{StaticResource MutedTextColor}" FontSize="13" />
+                        <Label Text="Очистити плейлисти" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource PrimaryTextColor}" />
+                        <Label Text="Видалити всі збережені плейлисти, включно з Улюбленими." TextColor="{StaticResource MutedTextColor}" FontSize="13" />
                     </VerticalStackLayout>
-                    <Button Grid.Column="1" Text="Clear" Clicked="OnClearPlaylists" BackgroundColor="#E53935" TextColor="White" CornerRadius="12" Padding="14,10" />
+                    <Border Grid.Column="1" WidthRequest="48" HeightRequest="48" BackgroundColor="{StaticResource SurfaceColor}" Stroke="{StaticResource BorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 16" HorizontalOptions="End" VerticalOptions="Center">
+                        <ImageButton Grid.Column="1" Padding="12" BackgroundColor="Transparent" Source="delete.png" Clicked="OnClearPlaylists" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
                 </Grid>
             </Border>
 
             <Border BackgroundColor="{StaticResource CardColor}" Stroke="{StaticResource BorderColor}" StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="14">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalOptions="Center">
                     <VerticalStackLayout Spacing="4">
-                        <Label Text="Check for updates" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource PrimaryTextColor}" />
-                        <Label Text="Coming soon." TextColor="{StaticResource MutedTextColor}" FontSize="13" />
+                        <Label Text="Перевірити наявність оновлень" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource PrimaryTextColor}" />
+                        <Label Text="Скоро будуть, якщо автор не забуде :)." TextColor="{StaticResource MutedTextColor}" FontSize="13" />
                     </VerticalStackLayout>
                     <Button Grid.Column="1" Text="Check" Clicked="OnCheckUpdates" BackgroundColor="{StaticResource SurfaceColor}" TextColor="{StaticResource PrimaryTextColor}" CornerRadius="12" Padding="14,10" />
                 </Grid>

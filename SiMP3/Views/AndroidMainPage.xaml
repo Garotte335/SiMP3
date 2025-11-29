@@ -9,13 +9,13 @@
 
     <ContentPage.Resources>
         <ResourceDictionary>
-            <Color x:Key="PageBackgroundColor">#0D0D0D</Color>
-            <Color x:Key="SurfaceColor">#121212</Color>
-            <Color x:Key="CardColor">#161616</Color>
-            <Color x:Key="BorderColor">#1F1F1F</Color>
-            <Color x:Key="AccentColor">#3A57E8</Color>
+            <Color x:Key="PageBackgroundColor">#050505</Color>
+            <Color x:Key="SurfaceColor">#0E0E10</Color>
+            <Color x:Key="CardColor">#12131A</Color>
+            <Color x:Key="BorderColor">#1E2030</Color>
+            <Color x:Key="AccentColor">#C084FC</Color>
             <Color x:Key="PrimaryTextColor">#FFFFFF</Color>
-            <Color x:Key="MutedTextColor">#B0B0B0</Color>
+            <Color x:Key="MutedTextColor">#B5B5C0</Color>
 
             <Style x:Key="TabLabelStyle" TargetType="Label">
                 <Setter Property="FontSize" Value="14" />
@@ -24,11 +24,14 @@
                 <Setter Property="TextColor" Value="{StaticResource MutedTextColor}" />
             </Style>
 
-            <Style x:Key="SearchEntryStyle" TargetType="Entry">
-                <Setter Property="BackgroundColor" Value="Transparent" />
-                <Setter Property="TextColor" Value="{StaticResource PrimaryTextColor}" />
-                <Setter Property="PlaceholderColor" Value="{StaticResource MutedTextColor}" />
-                <Setter Property="FontSize" Value="14" />
+            <Style x:Key="IconButton" TargetType="Border">
+                <Setter Property="WidthRequest" Value="44" />
+                <Setter Property="HeightRequest" Value="44" />
+                <Setter Property="BackgroundColor" Value="{StaticResource SurfaceColor}" />
+                <Setter Property="Stroke" Value="{StaticResource BorderColor}" />
+                <Setter Property="StrokeThickness" Value="1" />
+                <Setter Property="StrokeShape" Value="RoundRectangle 14" />
+                <Setter Property="Padding" Value="0" />
             </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
@@ -40,22 +43,22 @@
         </Grid.RowDefinitions>
 
         <!-- TAB SWITCHER -->
-        <Grid Grid.Row="0" Padding="16,0,16,8" BackgroundColor="{StaticResource PageBackgroundColor}">
+        <Grid Grid.Row="0" Padding="16,4,16,10" BackgroundColor="{StaticResource PageBackgroundColor}">
             <CollectionView
                 x:Name="TabStrip"
                 ItemsSource="{Binding Tabs}"
                 SelectionMode="Single"
                 SelectedItem="{Binding SelectedTab, Mode=TwoWay}"
-                 HorizontalOptions="Center"
+                HorizontalOptions="Center"
                 HorizontalScrollBarVisibility="Never"
-                HeightRequest="44"
+                HeightRequest="48"
                 SelectionChanged="OnTabSelectionChanged">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Horizontal" ItemSpacing="24" />
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Grid Padding="4,6" RowDefinitions="Auto,Auto" RowSpacing="6" HorizontalOptions="Center">
+                        <Grid Padding="6,8" RowDefinitions="Auto,Auto" RowSpacing="6" HorizontalOptions="Center">
                             <Label
                                 x:Name="TabLabel"
                                 Text="{Binding .}"
@@ -64,7 +67,7 @@
                                 x:Name="TabIndicator"
                                 Grid.Row="1"
                                 HeightRequest="3"
-                                WidthRequest="24"
+                                WidthRequest="26"
                                 HorizontalOptions="Center"
                                 BackgroundColor="Transparent"
                                 CornerRadius="2" />
@@ -104,25 +107,20 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Padding="4,4,4,10" VerticalOptions="Center">
+                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Padding="4,6,4,12" VerticalOptions="Center">
                     <Label
-                        Text="Library"
-                        FontSize="16"
+                        Text="Бібліотека"
+                        FontSize="18"
                         FontAttributes="Bold"
                         TextColor="{StaticResource PrimaryTextColor}"
                         VerticalOptions="Center" />
                     <Border
                         Grid.Column="1"
-                        WidthRequest="36"
-                        HeightRequest="36"
-                        BackgroundColor="{StaticResource SurfaceColor}"
-                        Stroke="{StaticResource BorderColor}"
-                        StrokeThickness="1"
-                        StrokeShape="RoundRectangle 18"
+                        Style="{StaticResource IconButton}"
                         HorizontalOptions="End"
                         VerticalOptions="Center">
                         <ImageButton
-                            Padding="8"
+                            Padding="10"
                             BackgroundColor="Transparent"
                             Source="list.png"
                             Clicked="OnSortClicked"
@@ -138,7 +136,7 @@
                     SelectionMode="Single"
                     SelectionChanged="OnTrackSelected"
                     SelectionChangedCommand="{x:Null}"
-                    Margin="0,0,0,90">
+                    Margin="0,0,0,96">
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
                     </CollectionView.ItemsLayout>
@@ -149,14 +147,14 @@
                                 Stroke="{StaticResource BorderColor}"
                                 StrokeThickness="1"
                                 Padding="12"
-                                HeightRequest="76"
-                                StrokeShape="RoundRectangle 14">
+                                HeightRequest="80"
+                                StrokeShape="RoundRectangle 16">
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalOptions="Center">
                                     <Border
-                                        WidthRequest="52"
-                                        HeightRequest="52"
+                                        WidthRequest="56"
+                                        HeightRequest="56"
                                         BackgroundColor="{StaticResource BorderColor}"
-                                        StrokeShape="RoundRectangle 12"
+                                        StrokeShape="RoundRectangle 14"
                                         StrokeThickness="0">
                                         <Image Source="{Binding Cover}" Aspect="AspectFill" />
                                     </Border>
@@ -164,13 +162,13 @@
                                     <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
                                         <Label
                                             Text="{Binding Title}"
-                                            FontSize="14"
+                                            FontSize="15"
                                             FontAttributes="Bold"
                                             TextColor="{StaticResource PrimaryTextColor}"
                                             LineBreakMode="TailTruncation" />
                                         <Label
                                             Text="{Binding Artist}"
-                                            FontSize="12"
+                                            FontSize="13"
                                             TextColor="{StaticResource MutedTextColor}"
                                             LineBreakMode="TailTruncation" />
                                     </VerticalStackLayout>
@@ -194,7 +192,7 @@
                                         </VisualState>
                                         <VisualState Name="Selected">
                                             <VisualState.Setters>
-                                                <Setter Property="BackgroundColor" Value="#1E2335" />
+                                                <Setter Property="BackgroundColor" Value="#191C2A" />
                                                 <Setter Property="Stroke" Value="{StaticResource AccentColor}" />
                                             </VisualState.Setters>
                                         </VisualState>
@@ -210,21 +208,21 @@
             <Grid Padding="16" VerticalOptions="End" HorizontalOptions="Fill" RowSpacing="0">
                 <Border
                     x:Name="MiniPlayerBar"
-                    Padding="10"
+                    Padding="12"
                     BackgroundColor="{StaticResource SurfaceColor}"
                     Stroke="{StaticResource BorderColor}"
                     StrokeThickness="1"
                     StrokeShape="RoundRectangle 18"
-                    HeightRequest="64"
+                    HeightRequest="72"
                     IsVisible="False"
                     TranslationY="6"
-                    Margin="0,0,0,4">
+                    Margin="0,0,0,6">
                     <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="12" VerticalOptions="Center">
                         <Border
-                            WidthRequest="44"
-                            HeightRequest="44"
+                            WidthRequest="48"
+                            HeightRequest="48"
                             BackgroundColor="{StaticResource BorderColor}"
-                            StrokeShape="RoundRectangle 10"
+                            StrokeShape="RoundRectangle 12"
                             StrokeThickness="0"
                             VerticalOptions="Center">
                             <Image
@@ -237,13 +235,13 @@
                         <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
                             <Label
                                 x:Name="MiniTitle"
-                                FontSize="13"
+                                FontSize="14"
                                 FontAttributes="Bold"
                                 TextColor="{StaticResource PrimaryTextColor}"
                                 LineBreakMode="TailTruncation" />
                             <Label
                                 x:Name="MiniArtist"
-                                FontSize="11"
+                                FontSize="12"
                                 TextColor="{StaticResource MutedTextColor}"
                                 LineBreakMode="TailTruncation" />
                         </VerticalStackLayout>
@@ -252,8 +250,8 @@
                             Grid.Column="2"
                             Source="prev.png"
                             BackgroundColor="Transparent"
-                            HeightRequest="28"
-                            WidthRequest="28"
+                            HeightRequest="30"
+                            WidthRequest="30"
                             Clicked="OnPrevClicked" />
 
                         <ImageButton
@@ -261,16 +259,16 @@
                             x:Name="MiniPlayPauseBtn"
                             Source="play_btn.png"
                             BackgroundColor="Transparent"
-                            HeightRequest="32"
-                            WidthRequest="32"
+                            HeightRequest="36"
+                            WidthRequest="36"
                             Clicked="OnPlayPauseClicked" />
 
                         <ImageButton
                             Grid.Column="4"
                             Source="next.png"
                             BackgroundColor="Transparent"
-                            HeightRequest="28"
-                            WidthRequest="28"
+                            HeightRequest="30"
+                            WidthRequest="30"
                             Clicked="OnNextClicked" />
                     </Grid>
 

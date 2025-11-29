@@ -27,7 +27,7 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
 
     private string _selectedTab = string.Empty;
     public ObservableCollection<TrackModel> Tracks => _controller.Tracks;
-    public ObservableCollection<string> Tabs { get; } = new(new[] { "All", "Artists", "Albums", "Playlists" });
+    public ObservableCollection<string> Tabs { get; } = new(new[] { "Все", "Виконавці", "Альбоми", "Плейлисти" });
 
     public string SelectedTab
     {
@@ -123,7 +123,7 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
 
         if (e.CurrentSelection?.FirstOrDefault() is string tab)
         {
-            if (tab == "Playlists")
+            if (tab == "Плейлисти")
             {
                 _ = OpenPlaylistsAsync();
                 return;
@@ -142,7 +142,7 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
         try
         {
             _playlistPage = App.Services.GetRequiredService<Views.PlaylistPage>();
-            _playlistPage.ApplySearch(SelectedTab == "Playlists" ? _searchQuery : null);
+            _playlistPage.ApplySearch(SelectedTab == "Плейлисти" ? _searchQuery : null);
             await Shell.Current.Navigation.PushAsync(_playlistPage);
         }
         finally
@@ -158,11 +158,11 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
         _controller.SetArtistFilter(null);
         _controller.SetAlbumFilter(null);
 
-        if (tab == "Artists")
+        if (tab == "Виконавці")
         {
             var artists = _controller.GetAllTracksSnapshot().Select(t => t.Artist).Where(a => !string.IsNullOrWhiteSpace(a)).Distinct().OrderBy(a => a).ToArray();
-            var choice = await DisplayActionSheet("Select artist", "Cancel", null, artists);
-            if (string.IsNullOrWhiteSpace(choice) || choice == "Cancel")
+            var choice = await DisplayActionSheet("Обрати виконавця", "Скасувати", null, artists);
+            if (string.IsNullOrWhiteSpace(choice) || choice == "Скасувати")
             {
                 SelectedTab = Tabs.First();
                 TabStrip.SelectedItem = SelectedTab;
@@ -173,11 +173,11 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
                 _controller.SetArtistFilter(choice);
             }
         }
-        else if (tab == "Albums")
+        else if (tab == "Альбоми")
         {
             var albums = _controller.GetAllTracksSnapshot().Select(t => t.Album).Where(a => !string.IsNullOrWhiteSpace(a)).Distinct().OrderBy(a => a).ToArray();
-            var choice = await DisplayActionSheet("Select album", "Cancel", null, albums);
-            if (string.IsNullOrWhiteSpace(choice) || choice == "Cancel")
+            var choice = await DisplayActionSheet("Обрати альбом", "Скасувати", null, albums);
+            if (string.IsNullOrWhiteSpace(choice) || choice == "Скасувати")
             {
                 SelectedTab = Tabs.First();
                 TabStrip.SelectedItem = SelectedTab;
@@ -205,7 +205,7 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
         else
             _controller.SetFilter(query);
 
-        _playlistPage?.ApplySearch(SelectedTab == "Playlists" ? query : null);
+        _playlistPage?.ApplySearch(SelectedTab == "Плейлисти" ? query : null);
     }
 
     private async Task ShowSortMenuAsync()
