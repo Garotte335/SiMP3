@@ -194,8 +194,8 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
     // ================= MINI PLAYER TAP =================
     private void OnMiniPlayerTapped(object sender, TappedEventArgs e)
     {
-        App.Services.GetRequiredService<IPlayerOverlayService>()
-            .Register(FullPlayerOverlay);
+        var overlay = App.Services.GetRequiredService<IPlayerOverlayService>();
+        overlay.Show();
     }
 
     private void OnCloseFullPlayer(object sender, EventArgs e)
