@@ -3,12 +3,40 @@
     x:Class="SiMP3.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:SiMP3"
     Title="SiMP3">
+    <Shell.TitleView>
+        <Grid ColumnDefinitions="Auto,*,24" ColumnSpacing="10" Padding="12,8">
+            <!-- Назва -->
+            <Label
+            Grid.Column="0"
+            Text="SiMP3"
+            FontSize="20"
+            FontAttributes="Bold"
+            VerticalOptions="Center" />
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+            <!-- Пошук -->
+            <SearchBar
+            x:Name="GlobalSearchBar"
+            Grid.Column="1"
+            Placeholder="Пошук треків"
+            TextChanged="OnSearchTextChanged"
+            BackgroundColor="Transparent"
+            HeightRequest="36"
+            VerticalOptions="Center"
+            Margin="0,0,6,0"/>
 
+            <!-- Кнопка сетінгів -->
+            <ImageButton
+            x:Name="SettingsButton"
+            Grid.Column="2"
+            Source="menu.png"
+            BackgroundColor="Transparent"
+            HeightRequest="24"
+            WidthRequest="24"
+            Padding="10"
+            VerticalOptions="Center"
+            Aspect="AspectFit"
+            Clicked="OnSettingsClicked"/>
+        </Grid>
+    </Shell.TitleView>
 </Shell>

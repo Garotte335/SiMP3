@@ -1029,6 +1029,8 @@ namespace SiMP3.Services
                     baseSet.OrderBy(t => t.Artist).ThenBy(t => t.Title),
                 TrackSortMode.ByDuration =>
                     baseSet.OrderBy(t => t.Duration).ThenBy(t => t.Title),
+                TrackSortMode.ByAlbum =>
+                    baseSet.OrderBy(t => t.Album).ThenBy(t => t.Title),
                 TrackSortMode.ByAdded =>
                     baseSet.OrderBy(t => _addedAt.TryGetValue(t.Path, out var dt) ? dt : DateTime.MinValue),
                 _ => // ByTitle
@@ -1159,6 +1161,7 @@ namespace SiMP3.Services
     {
         ByTitle,
         ByArtist,
+        ByAlbum,
         ByDuration,
         ByAdded
     }

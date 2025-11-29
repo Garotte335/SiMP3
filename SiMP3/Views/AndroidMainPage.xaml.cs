@@ -39,44 +39,18 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
     {
         InitializeComponent();
 
-        _controller = App.Services.GetService<MusicController>() ?? new MusicController(AudioManager.Current);
-        _playlistService = App.Services.GetService<PlaylistService>() ?? new PlaylistService();
+        _controller = App.Services.GetRequiredService<MusicController>();
+        _playlistService = App.Services.GetRequiredService<PlaylistService>();
         SelectedTab = Tabs.First();
         BindingContext = this;
 
-        ToolbarItems.Add(new ToolbarItem
-        {
-            Text = "Sort",
-            IconImageSource = "menu.png",
-            Order = ToolbarItemOrder.Primary,
-            Command = new Command(async () => await ShowSortMenuAsync())
-        });
-
-        // Add Cancel Import toolbar/menu item on Android using Command
-        ToolbarItems.Add(new ToolbarItem
-        {
-            Text = "Cancel import",
-            IconImageSource = "cancel.png",
-            Order = ToolbarItemOrder.Primary,
-            Command = new Command(async () =>
-            {
-                _controller.CancelImport();
-                await DisplayAlert("Імпорт", "Імпорт скасовано.", "OK");
-            })
-        });
-
         _controller.TrackChanged += Controller_TrackChanged;
         _controller.PlayStateChanged += Controller_PlayStateChanged;
-        _controller.ProgressChanged += Controller_ProgressChanged;
-        _controller.VolumeStateChanged += Controller_VolumeStateChanged;
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-
-        App.Services.GetRequiredService<IPlayerOverlayService>()
-            .Register(FullPlayerOverlay);
 
 #if ANDROID
         if (!_autoImportAttempted)
@@ -88,7 +62,6 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
         }
 #endif
         await _playlistService.EnsureLoadedAsync();
-        UpdateFavoriteIcon(_controller.CurrentTrack);
     }
 
     // ================= TRACK CHANGED =================
@@ -100,20 +73,10 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
         MiniTitle.Text = t.Title;
         MiniArtist.Text = t.Artist;
 
-        // full player
-        PlayerCover.Source = t.Cover;
-        PlayerTitle.Text = t.Title;
-        PlayerArtist.Text = t.Artist;
-
-        PlayerTimeStart.Text = "0:00";
-        PlayerTimeEnd.Text = t.DurationString;
-        PlayerProgressSlider.Value = 0;
-
         _isUpdatingSelection = true;
         PlaylistView.SelectedItem = Tracks.Contains(t) ? t : null;
         _isUpdatingSelection = false;
 
-        UpdateFavoriteIcon(t);
     }
 
     // ================= PLAY / PAUSE =================
@@ -121,7 +84,6 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
     {
         var icon = isPlaying ? "pause_btn.png" : "play_btn.png";
         MiniPlayPauseBtn.Source = icon;
-        PlayerPlayPauseBtn.Source = icon;
     }
 
     private void OnPlayPauseClicked(object sender, EventArgs e)
@@ -133,51 +95,6 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
 
     private void OnPrevClicked(object sender, EventArgs e)
         => _controller.Prev();
-
-    // ================= SHUFFLE / REPEAT =================
-    private void OnShuffleClicked(object sender, EventArgs e)
-    {
-        _controller.ToggleShuffle();
-        PlayerShuffleBtn.Opacity = _controller.IsShuffle ? 1.0 : 0.5;
-    }
-
-    private void OnRepeatClicked(object sender, EventArgs e)
-    {
-        _controller.CycleRepeatMode();
-
-        switch (_controller.RepeatMode)
-        {
-            case 0:
-                PlayerRepeatBtn.Source = "repeat.png";
-                PlayerRepeatBtn.Opacity = 0.5;
-                break;
-            case 1:
-                PlayerRepeatBtn.Source = "repeat.png";
-                PlayerRepeatBtn.Opacity = 1.0;
-                break;
-            case 2:
-                PlayerRepeatBtn.Source = "repeat_one.png";
-                PlayerRepeatBtn.Opacity = 1.0;
-                break;
-        }
-    }
-
-    // ================= PROGRESS =================
-    private void Controller_ProgressChanged(TimeSpan current, TimeSpan total, double progress)
-    {
-        PlayerProgressSlider.Value = progress;
-        PlayerTimeStart.Text = current.ToString(@"m\:ss");
-        PlayerTimeEnd.Text = total.ToString(@"m\:ss");
-    }
-
-    private void OnSeekChanged(object sender, ValueChangedEventArgs e)
-        => _controller.SeekRelative(e.NewValue);
-
-    // ================= VOLUME (Android можна ігнорити) =================
-    private void Controller_VolumeStateChanged(double volume, bool isMuted)
-    {
-        // На Android не показуємо слайдер гучності, можна нічого не робити
-    }
 
     // ================= PLAYLIST SELECTION =================
     private void OnTrackSelected(object sender, SelectionChangedEventArgs e)
@@ -192,16 +109,10 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
     }
 
     // ================= MINI PLAYER TAP =================
-    private void OnMiniPlayerTapped(object sender, TappedEventArgs e)
+    private async void OnMiniPlayerTapped(object sender, TappedEventArgs e)
     {
         var overlay = App.Services.GetRequiredService<IPlayerOverlayService>();
-        overlay.Show();
-    }
-
-    private void OnCloseFullPlayer(object sender, EventArgs e)
-    {
-        var overlay = App.Services.GetRequiredService<IPlayerOverlayService>();
-        overlay.Hide();
+        await overlay.OpenAsync();
     }
 
     // ================= TAB SWITCHER =================
@@ -230,13 +141,9 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
         _isOpeningPlaylists = true;
         try
         {
-            _playlistPage = new Views.PlaylistPage(_playlistService, _controller);
+            _playlistPage = App.Services.GetRequiredService<Views.PlaylistPage>();
             _playlistPage.ApplySearch(SelectedTab == "Playlists" ? _searchQuery : null);
-            await Navigation.PushModalAsync(new NavigationPage(_playlistPage)
-            {
-                BarBackgroundColor = Color.FromArgb("#0D0D0D"),
-                BarTextColor = Colors.White
-            });
+            await Shell.Current.Navigation.PushAsync(_playlistPage);
         }
         finally
         {
@@ -290,12 +197,7 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
         _controller.SetFilter(_searchQuery);
     }
 
-    private void OnSearchChanged(object sender, TextChangedEventArgs e)
-    {
-        ApplySearchFilter(e.NewTextValue ?? string.Empty);
-    }
-
-    private void ApplySearchFilter(string query)
+    public void ApplyGlobalSearch(string query)
     {
         _searchQuery = query;
         if (string.IsNullOrWhiteSpace(query))
@@ -306,59 +208,29 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
         _playlistPage?.ApplySearch(SelectedTab == "Playlists" ? query : null);
     }
 
-    private async void OnSettingsClicked(object sender, EventArgs e)
-    {
-        await Navigation.PushModalAsync(new NavigationPage(new Views.SettingsPage(_playlistService))
-        {
-            BarBackgroundColor = Color.FromArgb("#0D0D0D"),
-            BarTextColor = Colors.White
-        });
-    }
-
-    private async void OnFavoriteClicked(object sender, EventArgs e)
-    {
-        await _playlistService.EnsureLoadedAsync();
-        var track = _controller.CurrentTrack;
-        if (track == null)
-            return;
-
-        if (_playlistService.IsFavorite(track))
-            await _playlistService.RemoveFromFavorites(track);
-        else
-            await _playlistService.AddToFavorites(track);
-        UpdateFavoriteIcon(track);
-    }
-
-    private void UpdateFavoriteIcon(TrackModel? track)
-    {
-        if (track == null)
-        {
-            FavoriteButton.Opacity = 0.5;
-            return;
-        }
-
-        FavoriteButton.Opacity = _playlistService.IsFavorite(track) ? 1.0 : 0.5;
-    }
-
     private async Task ShowSortMenuAsync()
     {
         var choice = await DisplayActionSheet("Сортування", "Скасувати", null,
-            "За назвою", "За артистом", "За тривалістю", "За датою додавання");
+            "За назвою", "За виконавцем", "За альбомом", "За тривалістю");
 
         if (string.IsNullOrWhiteSpace(choice) || choice == "Скасувати")
             return;
 
         var mode = choice switch
         {
-            "За артистом" => TrackSortMode.ByArtist,
+            "За виконавцем" => TrackSortMode.ByArtist,
+            "За альбомом" => TrackSortMode.ByAlbum,
             "За тривалістю" => TrackSortMode.ByDuration,
-            "За датою додавання" => TrackSortMode.ByAdded,
             _ => TrackSortMode.ByTitle
         };
 
         _controller.SetSortMode(mode);
     }
 
+    private async void OnSortClicked(object sender, EventArgs e)
+    {
+        await ShowSortMenuAsync();
+    }
     // ================= PROPERTY CHANGED =================
     public new event PropertyChangedEventHandler? PropertyChanged;
 

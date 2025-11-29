@@ -1,5 +1,4 @@
 using Microsoft.Maui.Controls;
-using Microsoft.Extensions.DependencyInjection;
 using SiMP3.Services;
 
 namespace SiMP3.Views
@@ -15,10 +14,10 @@ namespace SiMP3.Views
             Title = "Settings";
         }
 
-        protected override void OnAppearing()
+        protected override async void OnAppearing()
         {
             base.OnAppearing();
-            App.Services.GetRequiredService<IPlayerOverlayService>().Hide();
+            await App.Services.GetRequiredService<IPlayerOverlayService>().CloseAsync();
         }
 
         private async void OnClearPlaylists(object sender, EventArgs e)

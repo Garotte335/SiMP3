@@ -31,6 +31,7 @@ namespace SiMP3
             builder.Services.AddTransient<Views.PlaylistPage>();
             builder.Services.AddTransient<Views.PlaylistEditorPage>();
             builder.Services.AddTransient<Views.SettingsPage>();
+            builder.Services.AddTransient<Views.FullPlayerPage>();
 
             builder.ConfigureLifecycleEvents(events =>
             {

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="SiMP3.Views.FullPlayerPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="#CC0D0D0D"
+    Padding="0">
+
+    <Grid RowDefinitions="Auto,*" RowSpacing="0" Padding="0" x:Name="RootGrid">
+        <Grid Grid.Row="0" Padding="16,18,16,12" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+
+            <Label
+                Text="Now Playing"
+                FontSize="16"
+                FontAttributes="Bold"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                TextColor="{StaticResource PrimaryTextColor}" />
+
+            <ImageButton
+                Grid.Column="1"
+                x:Name="FavoriteButton"
+                Source="like.png"
+                BackgroundColor="Transparent"
+                HeightRequest="28"
+                WidthRequest="28"
+                Clicked="OnFavoriteClicked"
+                HorizontalOptions="End"
+                VerticalOptions="Center" />
+        </Grid>
+
+        <Grid Grid.Row="1" RowDefinitions="*,Auto,Auto" RowSpacing="18" Padding="28,6,28,28" HorizontalOptions="Center" VerticalOptions="FillAndExpand">
+            <Border
+                Grid.Row="0"
+                BackgroundColor="{StaticResource SurfaceColor}"
+                Stroke="{StaticResource BorderColor}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 22"
+                WidthRequest="300"
+                HeightRequest="300"
+                HorizontalOptions="Center"
+                VerticalOptions="Center">
+                <Image
+                    x:Name="PlayerCover"
+                    Aspect="AspectFill"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+            </Border>
+
+            <VerticalStackLayout Grid.Row="1" Spacing="6" HorizontalOptions="Center" WidthRequest="320" Margin="0,8,0,0" VerticalOptions="Start">
+                <Label
+                    x:Name="PlayerTitle"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    HorizontalTextAlignment="Center"
+                    TextColor="{StaticResource PrimaryTextColor}"
+                    LineBreakMode="TailTruncation" />
+                <Label
+                    x:Name="PlayerArtist"
+                    FontSize="14"
+                    HorizontalTextAlignment="Center"
+                    TextColor="{StaticResource MutedTextColor}"
+                    LineBreakMode="TailTruncation" />
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" WidthRequest="320" Margin="0,14,0,0">
+                    <Label
+                        x:Name="PlayerTimeStart"
+                        Text="0:00"
+                        FontSize="11"
+                        TextColor="{StaticResource MutedTextColor}"
+                        VerticalOptions="Center" />
+                    <Slider
+                        x:Name="PlayerProgressSlider"
+                        Grid.Column="1"
+                        Minimum="0"
+                        Maximum="1"
+                        ValueChanged="OnSeekChanged"
+                        ThumbColor="{StaticResource AccentColor}"
+                        MaximumTrackColor="#333"
+                        MinimumTrackColor="{StaticResource AccentColor}" />
+                    <Label
+                        x:Name="PlayerTimeEnd"
+                        Grid.Column="2"
+                        Text="0:00"
+                        FontSize="11"
+                        TextColor="{StaticResource MutedTextColor}"
+                        VerticalOptions="Center"
+                        HorizontalOptions="End" />
+                </Grid>
+            </VerticalStackLayout>
+
+            <Grid Grid.Row="2" RowDefinitions="Auto,Auto" RowSpacing="12" VerticalOptions="End" WidthRequest="320">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="18" HorizontalOptions="Center">
+                    <ImageButton
+                        x:Name="PlayerShuffleBtn"
+                        Source="shuffle.png"
+                        BackgroundColor="Transparent"
+                        Opacity="0.5"
+                        Clicked="OnShuffleClicked"
+                        HeightRequest="28"
+                        WidthRequest="28"
+                        HorizontalOptions="Start" />
+
+                    <Grid Grid.Column="1" ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="16" HorizontalOptions="Center">
+                        <ImageButton
+                            Source="prev.png"
+                            BackgroundColor="Transparent"
+                            HeightRequest="36"
+                            WidthRequest="36"
+                            Clicked="OnPrevClicked"
+                            HorizontalOptions="Center" />
+
+                        <ImageButton
+                            x:Name="PlayerPlayPauseBtn"
+                            Grid.Column="1"
+                            Source="play_btn.png"
+                            BackgroundColor="Transparent"
+                            HeightRequest="48"
+                            WidthRequest="48"
+                            Clicked="OnPlayPauseClicked"
+                            HorizontalOptions="Center" />
+
+                        <ImageButton
+                            Grid.Column="2"
+                            Source="next.png"
+                            BackgroundColor="Transparent"
+                            HeightRequest="36"
+                            WidthRequest="36"
+                            Clicked="OnNextClicked"
+                            HorizontalOptions="Center" />
+                    </Grid>
+
+                    <ImageButton
+                        Grid.Column="2"
+                        x:Name="PlayerRepeatBtn"
+                        Source="repeat.png"
+                        BackgroundColor="Transparent"
+                        Opacity="0.5"
+                        Clicked="OnRepeatClicked"
+                        HeightRequest="28"
+                        WidthRequest="28"
+                        HorizontalOptions="End" />
+                </Grid>
+
+                <Border
+                    Grid.Row="1"
+                    Padding="12"
+                    BackgroundColor="{StaticResource SurfaceColor}"
+                    StrokeShape="RoundRectangle 16"
+                    Stroke="{StaticResource BorderColor}"
+                    StrokeThickness="1"
+                    WidthRequest="320"
+                    IsVisible="{OnPlatform Android=False, iOS=False, Default=True}">
+                    <Slider
+                        x:Name="VolumeSlider"
+                        Minimum="0"
+                        Maximum="1"
+                        Value="0.5"
+                        ValueChanged="OnVolumeChanged"
+                        HeightRequest="30"
+                        MaximumTrackColor="#333"
+                        MinimumTrackColor="{StaticResource AccentColor}" />
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</ContentPage>

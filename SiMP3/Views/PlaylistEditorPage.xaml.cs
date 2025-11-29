@@ -80,7 +80,7 @@ namespace SiMP3.Views
                 return;
 
             await _playlistService.DeleteAsync(_playlist);
-            await Navigation.PopModalAsync();
+            await Shell.Current.Navigation.PopAsync();
         }
 
         private async void OnRemoveTrackSwipe(object sender, EventArgs e)
@@ -93,16 +93,17 @@ namespace SiMP3.Views
 
         private async void OnSortClicked(object sender, EventArgs e)
         {
-            var choice = await DisplayActionSheet("Sort tracks", "Cancel", null,
-                "By name", "By artist", "By duration");
+            var choice = await DisplayActionSheet("Сортування", "Скасувати", null,
+                "За назвою", "За виконавцем", "За альбомом", "За тривалістю");
 
-            if (string.IsNullOrWhiteSpace(choice) || choice == "Cancel")
+            if (string.IsNullOrWhiteSpace(choice) || choice == "Скасувати")
                 return;
 
             IOrderedEnumerable<TrackModel>? ordered = choice switch
             {
-                "By artist" => Tracks.OrderBy(t => t.Artist).ThenBy(t => t.Title),
-                "By duration" => Tracks.OrderBy(t => t.Duration).ThenBy(t => t.Title),
+                "За виконавцем" => Tracks.OrderBy(t => t.Artist).ThenBy(t => t.Title),
+                "За альбомом" => Tracks.OrderBy(t => t.Album).ThenBy(t => t.Title),
+                "За тривалістю" => Tracks.OrderBy(t => t.Duration).ThenBy(t => t.Title),
                 _ => Tracks.OrderBy(t => t.Title)
             };
 
@@ -114,11 +115,6 @@ namespace SiMP3.Views
                     Tracks.Add(t);
                 await _playlistService.UpdatePlaylistAsync(_playlist);
             }
-        }
-
-        private async void OnCloseClicked(object sender, EventArgs e)
-        {
-            await Navigation.PopModalAsync();
         }
 
         private void OnTrackTapped(object sender, TappedEventArgs e)
@@ -180,10 +176,10 @@ namespace SiMP3.Views
         private void OnPrevClicked(object sender, EventArgs e)
             => _musicController.Prev();
 
-        private void OnMiniPlayerTapped(object sender, TappedEventArgs e)
+        private async void OnMiniPlayerTapped(object sender, TappedEventArgs e)
         {
             var overlay = App.Services.GetRequiredService<IPlayerOverlayService>();
-            overlay.Show();
+            await overlay.OpenAsync();
         }
     }
 }

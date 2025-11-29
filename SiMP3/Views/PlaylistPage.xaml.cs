@@ -84,11 +84,7 @@ namespace SiMP3.Views
             {
                 await _playlistService.EnsureLoadedAsync();
                 var editor = new PlaylistEditorPage(playlist, _playlistService, _musicController);
-                await Navigation.PushModalAsync(new NavigationPage(editor)
-                {
-                    BarBackgroundColor = Color.FromArgb("#0D0D0D"),
-                    BarTextColor = Colors.White
-                });
+                await Shell.Current.Navigation.PushAsync(editor);
             }
         }
 
@@ -152,10 +148,10 @@ namespace SiMP3.Views
 
         private void OnPrevClicked(object sender, EventArgs e) => _musicController.Prev();
 
-        private void OnMiniPlayerTapped(object sender, TappedEventArgs e)
+        private async void OnMiniPlayerTapped(object sender, TappedEventArgs e)
         {
             var overlay = App.Services.GetRequiredService<IPlayerOverlayService>();
-            overlay.Show();
+            await overlay.OpenAsync();
         }
     }
 }

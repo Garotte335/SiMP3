@@ -1,5 +1,4 @@
 ﻿using Microsoft.Maui.Controls;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace SiMP3
 {
@@ -11,15 +10,7 @@ namespace SiMP3
         {
             InitializeComponent();
             Services = serviceProvider;
-        }
-
-        protected override Window CreateWindow(IActivationState? activationState)
-        {
-#if ANDROID
-            return new Window(new AndroidMainPage());
-#else
-            return new Window(new MainPage());
-#endif
+            MainPage = new AppShell();
         }
     }
 }

@@ -22,11 +22,11 @@ public partial class MainPage : ContentPage
     private const double PlaylistWidthExpanded = 260;
     private const double PlaylistWidthCollapsed = 0;
 
-    public MainPage()
+    public MainPage(MusicController controller)
     {
         InitializeComponent();
 
-        _controller = new MusicController(AudioManager.Current);
+        _controller = controller;
         BindingContext = this;
 
         _controller.TrackChanged += Controller_TrackChanged;

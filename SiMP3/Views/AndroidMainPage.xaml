@@ -36,67 +36,11 @@
     <Grid RowSpacing="10" BackgroundColor="{StaticResource PageBackgroundColor}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- HEADER -->
-        <Grid Grid.Row="0" Padding="16,10" BackgroundColor="{StaticResource PageBackgroundColor}" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-            <Label
-                Text="SiMP3"
-                FontSize="22"
-                FontAttributes="Bold"
-                VerticalOptions="Center"
-                TextColor="{StaticResource PrimaryTextColor}" />
-
-            <Border
-                Grid.Column="1"
-                BackgroundColor="{StaticResource SurfaceColor}"
-                Stroke="{StaticResource BorderColor}"
-                StrokeThickness="1"
-                 Padding="10,6"
-                StrokeShape="RoundRectangle 18"
-                HorizontalOptions="Fill"
-                VerticalOptions="Center">
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" VerticalOptions="Center">
-                    <Label
-                        Text="🔍"
-                        FontSize="14"
-                        VerticalOptions="Center"
-                        TextColor="{StaticResource MutedTextColor}" />
-                    <Entry
-                        x:Name="SearchEntry"
-                        Style="{StaticResource SearchEntryStyle}"
-                        Placeholder="Search"
-                        HorizontalOptions="FillAndExpand"
-                        BackgroundColor="Transparent" 
-                        TextChanged="OnSearchChanged"/>
-                </Grid>
-            </Border>
-
-            <Border
-                Grid.Column="2"
-                WidthRequest="32"
-                HeightRequest="32"
-                BackgroundColor="{StaticResource SurfaceColor}"
-                Stroke="{StaticResource BorderColor}"
-                StrokeThickness="1"
-                StrokeShape="RoundRectangle 16"
-                HorizontalOptions="End"
-                VerticalOptions="Center"
-                Padding="6">
-                <ImageButton
-                    Source="menu.png"
-                    BackgroundColor="Transparent"
-                    Clicked="OnSettingsClicked"
-                    Aspect="AspectFit"
-                    HorizontalOptions="Center"
-                    VerticalOptions="Center" />
-            </Border>
-        </Grid>
-
         <!-- TAB SWITCHER -->
-        <Grid Grid.Row="1" Padding="16,0,16,8" BackgroundColor="{StaticResource PageBackgroundColor}">
+        <Grid Grid.Row="0" Padding="16,0,16,8" BackgroundColor="{StaticResource PageBackgroundColor}">
             <CollectionView
                 x:Name="TabStrip"
                 ItemsSource="{Binding Tabs}"
@@ -149,7 +93,7 @@
         </Grid>
 
         <!-- MAIN CONTENT AREA -->
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
@@ -181,7 +125,7 @@
                             Padding="8"
                             BackgroundColor="Transparent"
                             Source="list.png"
-                            Command="{Binding Source={x:Reference AndroidPage}, Path=ToolbarItems[0].Command}"
+                            Clicked="OnSortClicked"
                             HorizontalOptions="Center"
                             VerticalOptions="Center" />
                     </Border>
@@ -336,150 +280,5 @@
                 </Border>
             </Grid>
         </Grid>
-
-        <!-- FULL PLAYER OVERLAY -->
-        <Grid x:Name="FullPlayerOverlay" Grid.RowSpan="3" BackgroundColor="#CC0D0D0D" IsVisible="False">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <Grid Grid.Row="0" Padding="16,18,16,12" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                <ImageButton
-                    Source="close.png"
-                    BackgroundColor="Transparent"
-                    HeightRequest="16"
-                    WidthRequest="16"
-                    Clicked="OnCloseFullPlayer"
-                    HorizontalOptions="Start"
-                    VerticalOptions="Center" />
-
-                <Label
-                    Grid.Column="1"
-                    Text="Now Playing"
-                    FontSize="16"
-                    FontAttributes="Bold"
-                    VerticalOptions="Center"
-                    HorizontalOptions="Center"
-                    TextColor="{StaticResource PrimaryTextColor}" />
-
-                <ImageButton
-                    Grid.Column="2"
-                    x:Name="FavoriteButton"
-                    Source="like.png"
-                    BackgroundColor="Transparent"
-                    HeightRequest="28"
-                    WidthRequest="28"
-                    Clicked="OnFavoriteClicked"
-                    HorizontalOptions="End"
-                    VerticalOptions="Center" />
-            </Grid>
-
-            <Grid Grid.Row="1" RowDefinitions="*,Auto,Auto" RowSpacing="18" Padding="28,6,28,28" HorizontalOptions="Center" VerticalOptions="FillAndExpand">
-                <Border
-                    Grid.Row="0"
-                    BackgroundColor="{StaticResource SurfaceColor}"
-                    Stroke="{StaticResource BorderColor}"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 22"
-                    WidthRequest="300"
-                    HeightRequest="300"
-                    HorizontalOptions="Center"
-                    VerticalOptions="Center">
-                    <Image
-                        x:Name="PlayerCover"
-                        Aspect="AspectFill"
-                        HorizontalOptions="Center"
-                        VerticalOptions="Center" />
-                </Border>
-
-                <VerticalStackLayout Grid.Row="1" Spacing="6" HorizontalOptions="Center" WidthRequest="320" Margin="0,8,0,0" VerticalOptions="Start">
-                    <Label
-                        x:Name="PlayerTitle"
-                        FontSize="20"
-                        FontAttributes="Bold"
-                        HorizontalTextAlignment="Center"
-                        TextColor="{StaticResource PrimaryTextColor}"
-                        LineBreakMode="TailTruncation" />
-                    <Label
-                        x:Name="PlayerArtist"
-                        FontSize="14"
-                        HorizontalTextAlignment="Center"
-                        TextColor="{StaticResource MutedTextColor}"
-                        LineBreakMode="TailTruncation" />
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" WidthRequest="320" Margin="0,14,0,0">
-                        <Label
-                            x:Name="PlayerTimeStart"
-                            Text="0:00"
-                            FontSize="11"
-                            TextColor="{StaticResource MutedTextColor}"
-                            VerticalOptions="Center" />
-                        <Slider
-                            x:Name="PlayerProgressSlider"
-                            Grid.Column="1"
-                            Minimum="0"
-                            Maximum="1"
-                            ThumbColor="{StaticResource AccentColor}"
-                            MinimumTrackColor="{StaticResource AccentColor}"
-                            MaximumTrackColor="#2A2A2A"
-                            ValueChanged="OnSeekChanged" />
-                        <Label
-                            x:Name="PlayerTimeEnd"
-                            Grid.Column="2"
-                            Text="0:00"
-                            FontSize="11"
-                            TextColor="{StaticResource MutedTextColor}"
-                            HorizontalOptions="End"
-                            VerticalOptions="Center" />
-                    </Grid>
-                </VerticalStackLayout>
-
-                <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="20" HorizontalOptions="Center" WidthRequest="300" VerticalOptions="End" Margin="0,10,0,0">
-                    <ImageButton
-                        x:Name="PlayerShuffleBtn"
-                        Source="shuffle.png"
-                        BackgroundColor="Transparent"
-                        Opacity="0.5"
-                        HeightRequest="30"
-                        WidthRequest="30"
-                        Clicked="OnShuffleClicked" />
-
-                    <ImageButton
-                        Grid.Column="1"
-                        Source="prev.png"
-                        BackgroundColor="Transparent"
-                        HeightRequest="36"
-                        WidthRequest="36"
-                        Clicked="OnPrevClicked" />
-
-                    <ImageButton
-                        Grid.Column="2"
-                        x:Name="PlayerPlayPauseBtn"
-                        Source="play_btn.png"
-                        BackgroundColor="Transparent"
-                        HeightRequest="56"
-                        WidthRequest="56"
-                        Clicked="OnPlayPauseClicked" />
-
-                    <ImageButton
-                        Grid.Column="3"
-                        Source="next.png"
-                        BackgroundColor="Transparent"
-                        HeightRequest="36"
-                        WidthRequest="36"
-                        Clicked="OnNextClicked" />
-
-                    <ImageButton
-                        Grid.Column="4"
-                        x:Name="PlayerRepeatBtn"
-                        Source="repeat.png"
-                        BackgroundColor="Transparent"
-                        Opacity="0.5"
-                        HeightRequest="30"
-                        WidthRequest="30"
-                        Clicked="OnRepeatClicked" />
-                </Grid>
-            </Grid>
-        </Grid>
-    </Grid>
+       </Grid>
 </ContentPage>
