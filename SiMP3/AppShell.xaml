@@ -3,7 +3,12 @@
     x:Class="SiMP3.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="SiMP3">
+    Title="SiMP3"
+    Shell.NavBarHasShadow="False"
+    Shell.BackgroundColor="{StaticResource ShellBackground}"
+    Shell.TitleColor="White"
+    Shell.ForegroundColor="White"
+    Shell.DisabledColor="#6E6E78">
     <Shell.Resources>
         <Color x:Key="ShellBackground">#0A0A0A</Color>
         <Color x:Key="ShellAccent">#C084FC</Color>
@@ -78,12 +83,12 @@
                 x:Name="SearchBarContainer">
                 <SearchBar
                     x:Name="GlobalSearchBar"
-                    Placeholder="Пошук треків"
+                    Placeholder="Пошук"
                     TextChanged="OnSearchTextChanged"
                     BackgroundColor="Transparent"
                     FontSize="14"
                     TextColor="White"
-                    PlaceholderColor="#A0A0A0"
+                    PlaceholderColor="#121216"
                     CancelButtonColor="{StaticResource ShellAccent}"
                     HeightRequest="36"
                     HorizontalOptions="Fill"

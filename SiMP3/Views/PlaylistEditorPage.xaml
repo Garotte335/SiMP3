@@ -106,10 +106,7 @@
                             </SwipeItems>
                         </SwipeView.RightItems>
                         <Border
-                            BackgroundColor="{StaticResource CardColor}"
-                            Stroke="{StaticResource BorderColor}"
-                            StrokeThickness="1"
-                            StrokeShape="RoundRectangle 16"
+                            Style="{StaticResource TrackCardStyle}"
                             Padding="12,10">
                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalOptions="Center">
                                 <Image
@@ -138,22 +135,6 @@
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnTrackTapped" />
                             </Border.GestureRecognizers>
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroup Name="CommonStates">
-                                    <VisualState Name="Normal">
-                                        <VisualState.Setters>
-                                            <Setter Property="BackgroundColor" Value="{StaticResource CardColor}" />
-                                            <Setter Property="Stroke" Value="{StaticResource BorderColor}" />
-                                        </VisualState.Setters>
-                                    </VisualState>
-                                    <VisualState Name="Selected">
-                                        <VisualState.Setters>
-                                            <Setter Property="BackgroundColor" Value="#191C2A" />
-                                            <Setter Property="Stroke" Value="{StaticResource AccentColor}" />
-                                        </VisualState.Setters>
-                                    </VisualState>
-                                </VisualStateGroup>
-                            </VisualStateManager.VisualStateGroups>
                         </Border>
                     </SwipeView>
                 </DataTemplate>

@@ -16,6 +16,7 @@ namespace SiMP3.Views
         private bool _suppressSelection;
 
         public TrackModel? CurrentTrack { get; private set; }
+        public string? CurrentTrackPath { get; private set; }
 
         public ObservableCollection<TrackModel> Tracks => _playlist.Tracks;
 
@@ -32,6 +33,7 @@ namespace SiMP3.Views
             _musicController.TrackChanged += OnControllerTrackChanged;
             _musicController.PlayStateChanged += OnControllerPlayStateChanged;
             CurrentTrack = _musicController.CurrentTrack;
+            CurrentTrackPath = _musicController.CurrentTrack?.Path;
             UpdateMiniPlayer(CurrentTrack);
         }
 
@@ -141,6 +143,8 @@ namespace SiMP3.Views
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 CurrentTrack = track;
+                CurrentTrackPath = track.Path;
+                OnPropertyChanged(nameof(CurrentTrackPath));
                 _suppressSelection = true;
                 TrackList.SelectedItem = _playlist.Tracks.FirstOrDefault(t => string.Equals(t.Path, track.Path, StringComparison.OrdinalIgnoreCase));
                 _suppressSelection = false;

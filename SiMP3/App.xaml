@@ -2,6 +2,7 @@
 <Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:SiMP3"
+             xmlns:converters="clr-namespace:SiMP3.Converters"
              x:Class="SiMP3.App">
     <Application.Resources>
         <ResourceDictionary>
@@ -9,6 +10,36 @@
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <converters:EqualityMultiConverter x:Key="EqualityMultiConverter" />
+
+            <Style x:Key="TrackCardStyle" TargetType="Border">
+                <Setter Property="BackgroundColor" Value="{DynamicResource CardColor}" />
+                <Setter Property="Stroke" Value="{DynamicResource BorderColor}" />
+                <Setter Property="StrokeThickness" Value="1" />
+                <Setter Property="StrokeShape" Value="RoundRectangle 16" />
+
+                <Style.Triggers>
+                    <DataTrigger Value="True">
+                        <DataTrigger.Binding>
+                            <MultiBinding Converter="{StaticResource EqualityMultiConverter}">
+                                <Binding Path="Path" />
+
+                                <Binding Path="CurrentTrackPath">
+                                    <Binding.RelativeSource>
+                                        <RelativeSource Mode="FindAncestor"
+                                            AncestorType="ContentPage" />
+                                    </Binding.RelativeSource>
+                                </Binding>
+                            </MultiBinding>
+                        </DataTrigger.Binding>
+
+                        <Setter Property="BackgroundColor" Value="#191C2A" />
+                        <Setter Property="Stroke" Value="{DynamicResource AccentColor}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>
