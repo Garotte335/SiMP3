@@ -56,7 +56,7 @@ namespace SiMP3.Views
 
         private async void OnAddPlaylistClicked(object sender, EventArgs e)
         {
-            var name = await DisplayPromptAsync("New playlist", "Enter playlist name", "Create", "Cancel", "", 50);
+            var name = await DisplayPromptAsync("Новий плейлист", "Введіть назву плейлиста", "Створити", "Скасувати", "", 50);
             if (string.IsNullOrWhiteSpace(name))
                 return;
 
@@ -69,7 +69,7 @@ namespace SiMP3.Views
         {
             if (sender is SwipeItem swipe && swipe.BindingContext is PlaylistModel playlist)
             {
-                var confirm = await DisplayAlert("Delete", $"Delete playlist '{playlist.Name}'?", "Yes", "No");
+                var confirm = await DisplayAlert("Видалити", $"Видалити плейлист '{playlist.Name}'?", "Так", "Ні");
                 if (confirm)
                 {
                     await _playlistService.DeleteAsync(playlist);
@@ -110,7 +110,7 @@ namespace SiMP3.Views
 
         private async void OnPlayPlaylistClicked(object sender, EventArgs e)
         {
-            if (sender is Button btn && btn.BindingContext is PlaylistModel playlist)
+            if (sender is BindableObject btn && btn.BindingContext is PlaylistModel playlist)
             {
                 await _playlistService.EnsureLoadedAsync();
                 _musicController.PlayPlaylist(playlist.Tracks.ToList());

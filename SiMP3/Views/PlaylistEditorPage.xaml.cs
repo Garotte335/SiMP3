@@ -16,6 +16,7 @@ namespace SiMP3.Views
         private bool _suppressSelection;
 
         public TrackModel? CurrentTrack { get; private set; }
+        public string? CurrentTrackPath { get; private set; }
 
         public ObservableCollection<TrackModel> Tracks => _playlist.Tracks;
 
@@ -32,6 +33,7 @@ namespace SiMP3.Views
             _musicController.TrackChanged += OnControllerTrackChanged;
             _musicController.PlayStateChanged += OnControllerPlayStateChanged;
             CurrentTrack = _musicController.CurrentTrack;
+            CurrentTrackPath = _musicController.CurrentTrack?.Path;
             UpdateMiniPlayer(CurrentTrack);
         }
 
@@ -47,13 +49,13 @@ namespace SiMP3.Views
             var allTracks = _musicController.GetAllTracksSnapshot().ToList();
             if (allTracks.Count == 0)
             {
-                await DisplayAlert("Немає треків", "Бібліотека пуста.", "OK");
+                await DisplayAlert("РќРµРјР°С” С‚СЂРµРєС–РІ", "Р‘С–Р±Р»С–РѕС‚РµРєР° РїСѓСЃС‚Р°.", "OK");
                 return;
             }
 
             var titles = allTracks.Select(t => t.Title).ToArray();
-            var selected = await DisplayActionSheet("Додати трек", "Скасувати", null, titles);
-            if (string.IsNullOrWhiteSpace(selected) || selected == "Скасувати")
+            var selected = await DisplayActionSheet("Р”РѕРґР°С‚Рё С‚СЂРµРє", "РЎРєР°СЃСѓРІР°С‚Рё", null, titles);
+            if (string.IsNullOrWhiteSpace(selected) || selected == "РЎРєР°СЃСѓРІР°С‚Рё")
                 return;
 
             var track = allTracks.FirstOrDefault(t => t.Title == selected);
@@ -65,7 +67,7 @@ namespace SiMP3.Views
 
         private async void OnTitleTapped(object sender, EventArgs e)
         {
-            var newName = await DisplayPromptAsync("Перейменувати", "Нова назва плейлиста", "Зберегти", "Скасувати", initialValue: _playlist.Name);
+            var newName = await DisplayPromptAsync("РџРµСЂРµР№РјРµРЅСѓРІР°С‚Рё", "РќРѕРІР° РЅР°Р·РІР° РїР»РµР№Р»РёСЃС‚Р°", "Р—Р±РµСЂРµРіС‚Рё", "РЎРєР°СЃСѓРІР°С‚Рё", initialValue: _playlist.Name);
             if (string.IsNullOrWhiteSpace(newName))
                 return;
 
@@ -75,7 +77,7 @@ namespace SiMP3.Views
 
         private async void OnDeleteClicked(object sender, EventArgs e)
         {
-            var confirm = await DisplayAlert("Видалити", $"Видалити плейлист '{_playlist.Name}'?", "Так", "Ні");
+            var confirm = await DisplayAlert("Р’РёРґР°Р»РёС‚Рё", $"Р’РёРґР°Р»РёС‚Рё РїР»РµР№Р»РёСЃС‚ '{_playlist.Name}'?", "РўР°Рє", "РќС–");
             if (!confirm)
                 return;
 
@@ -93,17 +95,17 @@ namespace SiMP3.Views
 
         private async void OnSortClicked(object sender, EventArgs e)
         {
-            var choice = await DisplayActionSheet("Сортування", "Скасувати", null,
-                "За назвою", "За виконавцем", "За альбомом", "За тривалістю");
+            var choice = await DisplayActionSheet("РЎРѕСЂС‚СѓРІР°РЅРЅСЏ", "РЎРєР°СЃСѓРІР°С‚Рё", null,
+                "Р—Р° РЅР°Р·РІРѕСЋ", "Р—Р° РІРёРєРѕРЅР°РІС†РµРј", "Р—Р° Р°Р»СЊР±РѕРјРѕРј", "Р—Р° С‚СЂРёРІР°Р»С–СЃС‚СЋ");
 
-            if (string.IsNullOrWhiteSpace(choice) || choice == "Скасувати")
+            if (string.IsNullOrWhiteSpace(choice) || choice == "РЎРєР°СЃСѓРІР°С‚Рё")
                 return;
 
             IOrderedEnumerable<TrackModel>? ordered = choice switch
             {
-                "За виконавцем" => Tracks.OrderBy(t => t.Artist).ThenBy(t => t.Title),
-                "За альбомом" => Tracks.OrderBy(t => t.Album).ThenBy(t => t.Title),
-                "За тривалістю" => Tracks.OrderBy(t => t.Duration).ThenBy(t => t.Title),
+                "Р—Р° РІРёРєРѕРЅР°РІС†РµРј" => Tracks.OrderBy(t => t.Artist).ThenBy(t => t.Title),
+                "Р—Р° Р°Р»СЊР±РѕРјРѕРј" => Tracks.OrderBy(t => t.Album).ThenBy(t => t.Title),
+                "Р—Р° С‚СЂРёРІР°Р»С–СЃС‚СЋ" => Tracks.OrderBy(t => t.Duration).ThenBy(t => t.Title),
                 _ => Tracks.OrderBy(t => t.Title)
             };
 
@@ -141,6 +143,8 @@ namespace SiMP3.Views
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 CurrentTrack = track;
+                CurrentTrackPath = track.Path;
+                OnPropertyChanged(nameof(CurrentTrackPath));
                 _suppressSelection = true;
                 TrackList.SelectedItem = _playlist.Tracks.FirstOrDefault(t => string.Equals(t.Path, track.Path, StringComparison.OrdinalIgnoreCase));
                 _suppressSelection = false;

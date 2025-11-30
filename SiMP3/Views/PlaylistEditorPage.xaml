@@ -93,27 +93,24 @@
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
             </CollectionView.ItemsLayout>
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:TrackModel">
-                    <SwipeView>
-                        <SwipeView.RightItems>
-                            <SwipeItems Mode="Reveal">
+        <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="models:TrackModel">
+                <SwipeView>
+                    <SwipeView.RightItems>
+                        <SwipeItems Mode="Reveal">
                                 <SwipeItem
                                     Text="Видалити"
                                     BackgroundColor="#E53935"
-                                    IconImageSource="delete.png"
-                                    Invoked="OnRemoveTrackSwipe" />
-                            </SwipeItems>
-                        </SwipeView.RightItems>
-                        <Border
-                            BackgroundColor="{StaticResource CardColor}"
-                            Stroke="{StaticResource BorderColor}"
-                            StrokeThickness="1"
-                            StrokeShape="RoundRectangle 16"
+                                IconImageSource="delete.png"
+                                Invoked="OnRemoveTrackSwipe" />
+                        </SwipeItems>
+                    </SwipeView.RightItems>
+                    <Border
+                            Style="{StaticResource TrackCardStyle}"
                             Padding="12,10">
-                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalOptions="Center">
-                                <Image
-                                    Source="{Binding Cover}"
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalOptions="Center">
+                            <Image
+                                Source="{Binding Cover}"
                                     WidthRequest="52"
                                     HeightRequest="52"
                                     Aspect="AspectFill" />
@@ -138,22 +135,6 @@
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnTrackTapped" />
                             </Border.GestureRecognizers>
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroup Name="CommonStates">
-                                    <VisualState Name="Normal">
-                                        <VisualState.Setters>
-                                            <Setter Property="BackgroundColor" Value="{StaticResource CardColor}" />
-                                            <Setter Property="Stroke" Value="{StaticResource BorderColor}" />
-                                        </VisualState.Setters>
-                                    </VisualState>
-                                    <VisualState Name="Selected">
-                                        <VisualState.Setters>
-                                            <Setter Property="BackgroundColor" Value="#191C2A" />
-                                            <Setter Property="Stroke" Value="{StaticResource AccentColor}" />
-                                        </VisualState.Setters>
-                                    </VisualState>
-                                </VisualStateGroup>
-                            </VisualStateManager.VisualStateGroups>
                         </Border>
                     </SwipeView>
                 </DataTemplate>

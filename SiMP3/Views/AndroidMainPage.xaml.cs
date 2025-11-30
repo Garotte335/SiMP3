@@ -23,11 +23,18 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
     private string? _selectedArtist;
     private string? _selectedAlbum;
     private Views.PlaylistPage? _playlistPage;
+    private string? _currentTrackPath;
 
 
     private string _selectedTab = string.Empty;
     public ObservableCollection<TrackModel> Tracks => _controller.Tracks;
     public ObservableCollection<string> Tabs { get; } = new(new[] { "Все", "Виконавці", "Альбоми", "Плейлисти" });
+
+    public string? CurrentTrackPath
+    {
+        get => _currentTrackPath;
+        private set => SetProperty(ref _currentTrackPath, value);
+    }
 
     public string SelectedTab
     {
@@ -46,6 +53,8 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
 
         _controller.TrackChanged += Controller_TrackChanged;
         _controller.PlayStateChanged += Controller_PlayStateChanged;
+
+        CurrentTrackPath = _controller.CurrentTrack?.Path;
     }
 
     protected override async void OnAppearing()
@@ -72,6 +81,8 @@ public partial class AndroidMainPage : ContentPage, INotifyPropertyChanged
         MiniCover.Source = t.Cover;
         MiniTitle.Text = t.Title;
         MiniArtist.Text = t.Artist;
+
+        CurrentTrackPath = t.Path;
 
         _isUpdatingSelection = true;
         PlaylistView.SelectedItem = Tracks.Contains(t) ? t : null;
