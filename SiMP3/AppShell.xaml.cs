@@ -22,8 +22,8 @@ namespace SiMP3;
 
         Items.Add(new ShellContent
         {
-            Route = nameof(AndroidMainPage),
-            ContentTemplate = new DataTemplate(() => App.Services.GetRequiredService<AndroidMainPage>()),
+            Route = nameof(MainPage),
+            ContentTemplate = new DataTemplate(() => new MainPage(App.Services.GetRequiredService<MusicController>())),
             Title = "Домівка"
         });
     }
@@ -51,9 +51,9 @@ namespace SiMP3;
         var query = e.NewTextValue ?? string.Empty;
         _musicController.SetFilter(query);
 
-        if (CurrentPage is AndroidMainPage androidMainPage)
+        if (CurrentPage is MainPage mainPage)
         {
-            androidMainPage.ApplyGlobalSearch(query);
+            mainPage.ApplyGlobalSearch(query);
         }
     }
 }

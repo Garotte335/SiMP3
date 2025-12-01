@@ -1,6 +1,5 @@
 ﻿using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
-using Plugin.Maui.Audio;
 using SiMP3.Models;
 using SiMP3.Services;
 using System.Collections.ObjectModel;
@@ -17,17 +16,15 @@ public partial class MainPage : ContentPage
 
     public ObservableCollection<TrackModel> Tracks => _controller.Tracks;
 
-    // Стан плейліста
-    private bool _isPlaylistVisible = true;
-    private const double PlaylistWidthExpanded = 260;
-    private const double PlaylistWidthCollapsed = 0;
-
     public MainPage(MusicController controller)
     {
         InitializeComponent();
 
         _controller = controller;
         BindingContext = this;
+
+        MobileHost.VisualizationRequested += OnVisualizationToggleClicked;
+        MobileHost.AddFilesRequested += OnPickFilesClicked;
 
         _controller.TrackChanged += Controller_TrackChanged;
         _controller.PlayStateChanged += Controller_PlayStateChanged;
@@ -76,6 +73,11 @@ public partial class MainPage : ContentPage
         VisualizationView.Stop();
 
         base.OnDisappearing();
+    }
+
+    public void ApplyGlobalSearch(string query)
+    {
+        MobileHost.ApplyGlobalSearch(query);
     }
 
     private async void OnSortClicked(object sender, EventArgs e)
@@ -233,7 +235,7 @@ public partial class MainPage : ContentPage
             CoverImage.IsVisible = false;
             VisualizationView.IsVisible = true;
             VisualizationView.Start();
-            btnVisualizationToggle.Text = "Visualization Off";
+            MobileHost.SetVisualizationLabel("Visualization Off");
             _controller.SetVisualizationActive(true);
         }
         else
@@ -241,46 +243,9 @@ public partial class MainPage : ContentPage
             CoverImage.IsVisible = true;
             VisualizationView.IsVisible = false;
             VisualizationView.Stop();
-            btnVisualizationToggle.Text = "Visualization On";
+            MobileHost.SetVisualizationLabel("Visualization On");
             _controller.SetVisualizationActive(false);
         }
-    }
-
-    // ============================
-    // ВИБІР ТРЕКУ ЗІ СПИСКУ
-    // ============================
-    private void OnTrackSelected(object sender, SelectionChangedEventArgs e)
-    {
-        if (e.CurrentSelection.Count == 0)
-            return;
-
-        if (e.CurrentSelection[0] is TrackModel track)
-            _controller.PlayTrack(track);
-    }
-
-
-    // =====================================================
-    // ANIMATION: ПРИХОВУВАНИЙ ПЛЕЙЛІСТ ДЛЯ WINDOWS
-    // =====================================================
-    private void OnTogglePlaylistClicked(object sender, EventArgs e)
-    {
-        double from = _isPlaylistVisible ? PlaylistWidthExpanded : PlaylistWidthCollapsed;
-        double to = _isPlaylistVisible ? PlaylistWidthCollapsed : PlaylistWidthExpanded;
-
-        var anim = new Animation(v =>
-        {
-            PlaylistColumn.Width = new GridLength(v);
-
-            if (v < 5)
-                PlaylistBorder.IsVisible = false;
-            else
-                PlaylistBorder.IsVisible = true;
-
-        }, from, to);
-
-        anim.Commit(this, "PlaylistSlide", 16, 250, Easing.CubicOut);
-
-        _isPlaylistVisible = !_isPlaylistVisible;
     }
 
     // Keep only the event handler that matches the XAML ToolbarItem signature

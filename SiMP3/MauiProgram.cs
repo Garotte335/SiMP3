@@ -27,9 +27,6 @@ namespace SiMP3
 
             // PAGES
             builder.Services.AddTransient<MainPage>();
-            builder.Services.AddTransient<AndroidMainPage>();
-            builder.Services.AddTransient<Views.PlaylistPage>();
-            builder.Services.AddTransient<Views.PlaylistEditorPage>();
             builder.Services.AddTransient<Views.SettingsPage>();
             builder.Services.AddTransient<Views.FullPlayerPage>();
 

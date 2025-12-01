@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
-    x:Class="SiMP3.Views.PlaylistPage"
+<ContentView
+    x:Class="SiMP3.Views.Mobile.PlaylistsView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:models="clr-namespace:SiMP3.Models"
     BackgroundColor="#0A0A0A">
 
-    <ContentPage.Resources>
+    <ContentView.Resources>
         <ResourceDictionary>
             <Color x:Key="PageBackgroundColor">#0A0A0A</Color>
             <Color x:Key="SurfaceColor">#121216</Color>
@@ -90,7 +90,7 @@
                 </SwipeView>
             </DataTemplate>
         </ResourceDictionary>
-    </ContentPage.Resources>
+    </ContentView.Resources>
 
     <Grid RowSpacing="14" Padding="16" BackgroundColor="{StaticResource PageBackgroundColor}">
         <Grid.RowDefinitions>
@@ -130,7 +130,7 @@
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
             </CollectionView.ItemsLayout>
         </CollectionView>
-        
+
         <!-- Mini player -->
         <Grid Grid.Row="2" Padding="0" VerticalOptions="End" HorizontalOptions="Fill" RowSpacing="0">
             <Border
@@ -205,4 +205,4 @@
             </Border>
         </Grid>
     </Grid>
-</ContentPage>
+</ContentView>

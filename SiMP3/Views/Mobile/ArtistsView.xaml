@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="SiMP3.Views.Mobile.ArtistsView"
+    x:Name="Artists"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:SiMP3.Models">
+
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <Color x:Key="PageBackgroundColor">#050505</Color>
+            <Color x:Key="SurfaceColor">#0E0E10</Color>
+            <Color x:Key="CardColor">#12131A</Color>
+            <Color x:Key="BorderColor">#1E2030</Color>
+            <Color x:Key="AccentColor">#C084FC</Color>
+            <Color x:Key="PrimaryTextColor">#FFFFFF</Color>
+            <Color x:Key="MutedTextColor">#B5B5C0</Color>
+
+            <Style x:Key="IconButton" TargetType="Border">
+                <Setter Property="WidthRequest" Value="44" />
+                <Setter Property="HeightRequest" Value="44" />
+                <Setter Property="BackgroundColor" Value="{StaticResource SurfaceColor}" />
+                <Setter Property="Stroke" Value="{StaticResource BorderColor}" />
+                <Setter Property="StrokeThickness" Value="1" />
+                <Setter Property="StrokeShape" Value="RoundRectangle 14" />
+                <Setter Property="Padding" Value="0" />
+            </Style>
+        </ResourceDictionary>
+    </ContentView.Resources>
+
+    <Grid RowSpacing="10" BackgroundColor="{StaticResource PageBackgroundColor}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- HEADER -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Padding="4,6,4,12" VerticalOptions="Center">
+            <Label
+                Text="Виконавці"
+                FontSize="18"
+                FontAttributes="Bold"
+                TextColor="{StaticResource PrimaryTextColor}"
+                VerticalOptions="Center" />
+            <Border
+                Grid.Column="1"
+                Style="{StaticResource IconButton}"
+                HorizontalOptions="End"
+                VerticalOptions="Center">
+                <ImageButton
+                    Padding="10"
+                    BackgroundColor="Transparent"
+                    Source="list.png"
+                    Clicked="OnSortClicked"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <CollectionView
+                x:Name="PlaylistView"
+                Grid.Row="1"
+                ItemsSource="{Binding Tracks}"
+                SelectionMode="Single"
+                SelectionChanged="OnTrackSelected"
+                SelectionChangedCommand="{x:Null}"
+                Margin="16,0,16,96">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:TrackModel">
+                        <Border
+                            BackgroundColor="{StaticResource CardColor}"
+                            Stroke="{StaticResource BorderColor}"
+                            StrokeThickness="1"
+                            Padding="12"
+                            HeightRequest="80"
+                            StrokeShape="RoundRectangle 16">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalOptions="Center">
+                                <Border
+                                    WidthRequest="56"
+                                    HeightRequest="56"
+                                    BackgroundColor="{StaticResource BorderColor}"
+                                    StrokeShape="RoundRectangle 14"
+                                    StrokeThickness="0">
+                                    <Image Source="{Binding Cover}" Aspect="AspectFill" />
+                                </Border>
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                    <Label
+                                        Text="{Binding Title}"
+                                        FontSize="15"
+                                        FontAttributes="Bold"
+                                        TextColor="{StaticResource PrimaryTextColor}"
+                                        LineBreakMode="TailTruncation" />
+                                    <Label
+                                        Text="{Binding Artist}"
+                                        FontSize="13"
+                                        TextColor="{StaticResource MutedTextColor}"
+                                        LineBreakMode="TailTruncation" />
+                                </VerticalStackLayout>
+
+                                <Label
+                                    Grid.Column="2"
+                                    Text="{Binding DurationString}"
+                                    FontSize="12"
+                                    TextColor="{StaticResource MutedTextColor}"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="End" />
+                            </Grid>
+
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup Name="CommonStates">
+                                    <VisualState Name="Normal">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="{StaticResource CardColor}" />
+                                            <Setter Property="Stroke" Value="{StaticResource BorderColor}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState Name="Selected">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="#191C2A" />
+                                            <Setter Property="Stroke" Value="{StaticResource AccentColor}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- MINI PLAYER -->
+            <Grid Padding="16" VerticalOptions="End" HorizontalOptions="Fill" RowSpacing="0">
+                <Border
+                    x:Name="MiniPlayerBar"
+                    Padding="12"
+                    BackgroundColor="{StaticResource SurfaceColor}"
+                    Stroke="{StaticResource BorderColor}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 18"
+                    HeightRequest="72"
+                    IsVisible="False"
+                    TranslationY="6"
+                    Margin="0,0,0,6">
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="12" VerticalOptions="Center">
+                        <Border
+                            WidthRequest="48"
+                            HeightRequest="48"
+                            BackgroundColor="{StaticResource BorderColor}"
+                            StrokeShape="RoundRectangle 12"
+                            StrokeThickness="0"
+                            VerticalOptions="Center">
+                            <Image
+                                x:Name="MiniCover"
+                                Aspect="AspectFill"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
+                        </Border>
+
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                            <Label
+                                x:Name="MiniTitle"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource PrimaryTextColor}"
+                                LineBreakMode="TailTruncation" />
+                            <Label
+                                x:Name="MiniArtist"
+                                FontSize="12"
+                                TextColor="{StaticResource MutedTextColor}"
+                                LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+
+                        <ImageButton
+                            Grid.Column="2"
+                            Source="prev.png"
+                            BackgroundColor="Transparent"
+                            HeightRequest="30"
+                            WidthRequest="30"
+                            Clicked="OnPrevClicked" />
+
+                        <ImageButton
+                            Grid.Column="3"
+                            x:Name="MiniPlayPauseBtn"
+                            Source="play_btn.png"
+                            BackgroundColor="Transparent"
+                            HeightRequest="36"
+                            WidthRequest="36"
+                            Clicked="OnPlayPauseClicked" />
+
+                        <ImageButton
+                            Grid.Column="4"
+                            Source="next.png"
+                            BackgroundColor="Transparent"
+                            HeightRequest="30"
+                            WidthRequest="30"
+                            Clicked="OnNextClicked" />
+                    </Grid>
+
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnMiniPlayerTapped" />
+                    </Border.GestureRecognizers>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</ContentView>

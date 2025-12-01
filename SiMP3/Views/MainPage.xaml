@@ -1,12 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
     x:Class="SiMP3.MainPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mobile="clr-namespace:SiMP3.Views.Mobile"
     xmlns:views="clr-namespace:SiMP3.Views"
     BackgroundColor="#0B0B0C">
 
-    <!-- Toolbar: Cancel import (XAML, крос‑платформено) -->
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Cancel import"
                      IconImageSource="cancel.png"
@@ -15,9 +15,7 @@
                      Priority="0" />
     </ContentPage.ToolbarItems>
 
-    <!-- ===================== RESOURCES / STYLES ===================== -->
     <ContentPage.Resources>
-        <!-- Colors -->
         <Color x:Key="AccentColor">#C084FC</Color>
         <Color x:Key="PanelColor">#17181A</Color>
         <Color x:Key="PanelBorderColor">#303136</Color>
@@ -25,19 +23,16 @@
         <Color x:Key="TextSecondaryColor">#CCCCCC</Color>
         <Color x:Key="TextMutedColor">#888888</Color>
 
-        <!-- Base label -->
         <Style TargetType="Label" x:Key="BaseLabel">
             <Setter Property="TextColor" Value="{StaticResource TextPrimaryColor}" />
             <Setter Property="LineBreakMode" Value="TailTruncation" />
         </Style>
 
-        <!-- Caption -->
         <Style TargetType="Label" x:Key="CaptionLabel" BasedOn="{StaticResource BaseLabel}">
             <Setter Property="FontSize" Value="12" />
             <Setter Property="TextColor" Value="{StaticResource TextMutedColor}" />
         </Style>
 
-        <!-- Playlist row text -->
         <Style TargetType="Label" x:Key="PlaylistTitleLabel" BasedOn="{StaticResource BaseLabel}">
             <Setter Property="FontSize" Value="14" />
             <Setter Property="FontAttributes" Value="Bold" />
@@ -49,267 +44,157 @@
         </Style>
     </ContentPage.Resources>
 
+    <Grid Padding="16" ColumnDefinitions="*,520" RowDefinitions="*">
+        <mobile:MobileNavigationHost x:Name="MobileHost" />
 
-    <!-- ===================== MAIN LAYOUT ===================== -->
-    <Grid Padding="16"
-          RowDefinitions="Auto,*,Auto">
+        <Grid Grid.Column="1" RowDefinitions="*,Auto,Auto" RowSpacing="16">
+            <Grid RowDefinitions="Auto,Auto" RowSpacing="12">
+                <Border Grid.Row="0"
+                        BackgroundColor="{StaticResource PanelColor}"
+                        Stroke="{StaticResource PanelBorderColor}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 22"
+                        Padding="14">
+                    <Border.Shadow>
+                        <Shadow Brush="#AA000000"
+                                Offset="0,8"
+                                Radius="22"
+                                Opacity="0.5" />
+                    </Border.Shadow>
 
-        <!-- =========================================
-             TOP BAR + PLAYLIST + PLAYER
-             ========================================= -->
-        <Grid Grid.RowSpan="3">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+                    <Grid>
+                        <Image x:Name="CoverImage"
+                               Aspect="AspectFit"
+                               HeightRequest="410"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center" />
 
-            <Grid.ColumnDefinitions>
-                <!-- колона плейлиста, її ширина анімується у коді -->
-                <ColumnDefinition x:Name="PlaylistColumn" Width="260" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+                        <views:AudioVisualizationView x:Name="VisualizationView"
+                                                      IsVisible="False" />
+                    </Grid>
+                </Border>
 
-            <!-- ========================= TOP BAR ========================= -->
-            <!-- Обгортка-бордер для Mica / blur-ефекту -->
-            <Border Grid.Row="0" Grid.ColumnSpan="2"
-                    Margin="0,0,0,12"
-                    Padding="12,6"
-                    StrokeThickness="0"
-                    StrokeShape="RoundRectangle 14"
-                    BackgroundColor="#B015151C">
-                <!-- Shadow дає “плаваючу” панель, як у Win11 -->
-                <Border.Shadow>
-                    <Shadow Brush="#66000000"
-                            Offset="0,4"
-                            Radius="18"
-                            Opacity="0.5" />
-                </Border.Shadow>
+                <VerticalStackLayout Grid.Row="1"
+                                     Spacing="4"
+                                     Padding="4,0,4,0">
+                    <Label x:Name="lblTitle"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimaryColor}" />
 
-                <!-- Тут можна підвісити платформений blur (WinUI) через handler -->
-
-                <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto"
-                      ColumnSpacing="12">
+                    <Label x:Name="lblArtist"
+                           FontSize="15"
+                           TextColor="{StaticResource TextSecondaryColor}" />
 
                     <HorizontalStackLayout Spacing="6">
-                        <Image Source="like.png"
-                               HeightRequest="22"
-                               WidthRequest="22"
+                        <Label x:Name="lblAlbum"
+                               FontSize="13"
+                               TextColor="#AAAAAA" />
+                        <Label Text="•"
+                               FontSize="12"
+                               TextColor="#666666"
                                VerticalOptions="Center" />
-
-                        <Label Text="SiMP3"
-                               FontSize="22"
-                               FontAttributes="Bold"
-                               TextColor="{StaticResource TextPrimaryColor}"
-                               VerticalOptions="Center" />
+                        <Label x:Name="lblYear"
+                               FontSize="13"
+                               TextColor="#AAAAAA" />
                     </HorizontalStackLayout>
 
-                    <Label x:Name="lblTitleBar"
-                           Grid.Column="1"
-                           FontSize="14"
-                           TextColor="#DDDDDD"
-                           LineBreakMode="TailTruncation"
-                           HorizontalOptions="Center"
-                           VerticalOptions="Center" />
+                    <Label x:Name="lblGenre"
+                           FontSize="13"
+                           TextColor="{StaticResource TextMutedColor}" />
 
-                    <Button Grid.Column="2"
-                            x:Name="btnVisualizationToggle"
-                            Text="Зорові образи"
-                            Padding="14,6"
-                            BackgroundColor="#22242A"
-                            TextColor="White"
-                            CornerRadius="8"
-                            Clicked="OnVisualizationToggleClicked" />
+                    <Label x:Name="lblTrackNumber"
+                           Style="{StaticResource CaptionLabel}" />
 
-                    <Button Grid.Column="3"
-                            Text="Сортувати"
-                            Clicked="OnSortClicked"
-                            Padding="14,6"
-                            BackgroundColor="#22242A"
-                            TextColor="White"
-                            CornerRadius="8" />
+                </VerticalStackLayout>
+            </Grid>
 
-                    <Button Grid.Column="4"
-                            Text="Додати файли"
-                            Clicked="OnPickFilesClicked"
-                            Padding="14,6"
-                            BackgroundColor="#22242A"
-                            TextColor="White"
-                            CornerRadius="8" />
-                </Grid>
-            </Border>
+            <Grid Grid.Row="1"
+                  ColumnDefinitions="60,*,60"
+                  ColumnSpacing="10"
+                  VerticalOptions="Center">
 
-            <!-- ========================= PLAYLIST PANEL ========================= -->
-            <Border x:Name="PlaylistBorder"
-                    Grid.Row="1" Grid.Column="0"
-                    BackgroundColor="{StaticResource PanelColor}"
-                    Stroke="{StaticResource PanelBorderColor}"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 12"
-                    Padding="6"
-                    Margin="0,0,12,0">
+                <Label x:Name="lblTimeStart"
+                       Grid.Column="0"
+                       WidthRequest="60"
+                       HorizontalTextAlignment="Start"
+                       FontSize="12"
+                       TextColor="#DDDDDD" />
 
-                <Border.Shadow>
-                    <Shadow Brush="#AA000000"
-                            Offset="0,4"
-                            Radius="14"
-                            Opacity="0.35" />
-                </Border.Shadow>
+                <Slider x:Name="progressSlider"
+                        Grid.Column="1"
+                        Minimum="0" Maximum="1"
+                        MinimumTrackColor="{StaticResource AccentColor}"
+                        MaximumTrackColor="#444"
+                        ThumbColor="{StaticResource AccentColor}"
+                        ValueChanged="OnSeekChanged" />
 
-                <CollectionView x:Name="tracksList"
-                                ItemsSource="{Binding Tracks}"
-                                SelectionMode="Single"
-                                SelectionChanged="OnTrackSelected">
+                <Label x:Name="lblTimeEnd"
+                       Grid.Column="2"
+                       WidthRequest="60"
+                       HorizontalTextAlignment="End"
+                       FontSize="12"
+                       TextColor="#DDDDDD" />
+            </Grid>
 
-                    <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="2" />
-                    </CollectionView.ItemsLayout>
+            <Grid Grid.Row="2"
+                  ColumnDefinitions="Auto,*,Auto"
+                  VerticalOptions="Center"
+                  Margin="0,0,0,4">
 
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <!-- рядок плейлиста -->
-                            <Border Padding="6"
-                                    StrokeThickness="0"
-                                    BackgroundColor="Transparent"
-                                    StrokeShape="RoundRectangle 8">
-                                <Grid ColumnDefinitions="Auto,*"
-                                      ColumnSpacing="10">
-                                    <Border WidthRequest="44"
-                                            HeightRequest="44"
-                                            BackgroundColor="#25262B"
-                                            StrokeThickness="0"
-                                            StrokeShape="RoundRectangle 10">
-                                        <Image Source="{Binding Cover}"
-                                               Aspect="AspectFill" />
-                                    </Border>
+                <ImageButton Grid.Column="0"
+                             x:Name="btnShuffle"
+                             Source="shuffle.png"
+                             BackgroundColor="Transparent"
+                             Opacity="0.5"
+                             HeightRequest="26"
+                             WidthRequest="26"
+                             Clicked="OnShuffleClicked">
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroupList>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal">
+                                    <VisualState.Setters>
+                                        <Setter Property="Scale" Value="1" />
+                                        <Setter Property="Opacity" Value="0.9" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Property="Scale" Value="1.07" />
+                                        <Setter Property="Opacity" Value="1" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Property="Scale" Value="0.96" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateGroupList>
+                    </VisualStateManager.VisualStateGroups>
+                </ImageButton>
 
-                                    <VerticalStackLayout Grid.Column="1"
-                                                         Spacing="2">
-                                        <Label Text="{Binding Title}"
-                                               Style="{StaticResource PlaylistTitleLabel}" />
-                                        <Label Text="{Binding Artist}"
-                                               Style="{StaticResource PlaylistArtistLabel}" />
-                                    </VerticalStackLayout>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </Border>
+                <Grid Grid.Column="1"
+                      ColumnDefinitions="Auto,Auto,Auto,Auto,Auto"
+                      ColumnSpacing="24"
+                      HorizontalOptions="Center">
 
-
-            <!-- ========================= MAIN PLAYER ========================= -->
-            <Grid Grid.Row="1" Grid.Column="1"
-                  RowDefinitions="*,Auto,Auto"
-                  RowSpacing="16">
-
-                <!-- COVER + METADATA -->
-                <Grid RowDefinitions="Auto,Auto" RowSpacing="12">
-
-                    <Border Grid.Row="0"
-                            BackgroundColor="{StaticResource PanelColor}"
-                            Stroke="{StaticResource PanelBorderColor}"
-                            StrokeThickness="1"
-                            StrokeShape="RoundRectangle 22"
-                            Padding="14">
-                        <Border.Shadow>
-                            <Shadow Brush="#AA000000"
-                                    Offset="0,8"
-                                    Radius="22"
-                                    Opacity="0.5" />
-                        </Border.Shadow>
-
-                        <Grid>
-                            <Image x:Name="CoverImage"
-                                   Aspect="AspectFit"
-                                   HeightRequest="410"
-                                   HorizontalOptions="Center"
-                                   VerticalOptions="Center" />
-
-                            <views:AudioVisualizationView x:Name="VisualizationView"
-                                                          IsVisible="False" />
-                        </Grid>
-                    </Border>
-
-                    <!-- METADATA -->
-                    <VerticalStackLayout Grid.Row="1"
-                                         Spacing="4"
-                                         Padding="4,0,4,0">
-                        <Label x:Name="lblTitle"
-                               FontSize="20"
-                               FontAttributes="Bold"
-                               TextColor="{StaticResource TextPrimaryColor}" />
-
-                        <Label x:Name="lblArtist"
-                               FontSize="15"
-                               TextColor="{StaticResource TextSecondaryColor}" />
-
-                        <HorizontalStackLayout Spacing="6">
-                            <Label x:Name="lblAlbum"
-                                   FontSize="13"
-                                   TextColor="#AAAAAA" />
-                            <Label Text="•"
-                                   FontSize="12"
-                                   TextColor="#666666"
-                                   VerticalOptions="Center" />
-                            <Label x:Name="lblYear"
-                                   FontSize="13"
-                                   TextColor="#AAAAAA" />
-                        </HorizontalStackLayout>
-
-                        <Label x:Name="lblGenre"
-                               FontSize="13"
-                               TextColor="{StaticResource TextMutedColor}" />
-
-                        <Label x:Name="lblTrackNumber"
-                               Style="{StaticResource CaptionLabel}" />
-
-                    </VerticalStackLayout>
-                </Grid>
-
-                <!-- PROGRESS -->
-                <Grid Grid.Row="1"
-                      ColumnDefinitions="60,*,60"
-                      ColumnSpacing="10"
-                      VerticalOptions="Center">
-
-                    <Label x:Name="lblTimeStart"
-                           Grid.Column="0"
-                           WidthRequest="60"
-                           HorizontalTextAlignment="Start"
-                           FontSize="12"
-                           TextColor="#DDDDDD" />
-
-                    <Slider x:Name="progressSlider"
-                            Grid.Column="1"
-                            Minimum="0" Maximum="1"
-                            MinimumTrackColor="{StaticResource AccentColor}"
-                            MaximumTrackColor="#444"
-                            ThumbColor="{StaticResource AccentColor}"
-                            ValueChanged="OnSeekChanged" />
-
-                    <Label x:Name="lblTimeEnd"
-                           Grid.Column="2"
-                           WidthRequest="60"
-                           HorizontalTextAlignment="End"
-                           FontSize="12"
-                           TextColor="#DDDDDD" />
-                </Grid>
-
-                <!-- CONTROLS: центрований блок + volume справа -->
-                <Grid Grid.Row="2"
-                      ColumnDefinitions="Auto,*,Auto"
-                      VerticalOptions="Center"
-                      Margin="0,0,0,4">
-
-                    <!-- Left: toggle playlist -->
                     <ImageButton Grid.Column="0"
-                                 x:Name="btnTogglePlaylist"
-                                 Source="list.png"
+                                 x:Name="btnRepeat"
+                                 Source="repeat.png"
                                  BackgroundColor="Transparent"
-                                 HeightRequest="26"
-                                 WidthRequest="26"
-                                 Clicked="OnTogglePlaylistClicked">
+                                 Opacity="0.5"
+                                 HeightRequest="24"
+                                 WidthRequest="24"
+                                 Clicked="OnRepeatClicked" />
+
+                    <ImageButton Grid.Column="1"
+                                 Source="prev.png"
+                                 BackgroundColor="Transparent"
+                                 HeightRequest="34"
+                                 WidthRequest="34"
+                                 Clicked="OnPrevClicked">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroupList>
                                 <VisualStateGroup x:Name="CommonStates">
@@ -335,237 +220,125 @@
                         </VisualStateManager.VisualStateGroups>
                     </ImageButton>
 
-                    <!-- Center: main controls -->
-                    <Grid Grid.Column="1"
-                          ColumnDefinitions="Auto,Auto,Auto,Auto,Auto"
-                          ColumnSpacing="24"
-                          HorizontalOptions="Center">
+                    <Border Grid.Column="2"
+                            BackgroundColor="#22242A"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="12,10"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center">
+                        <Grid ColumnDefinitions="Auto,Auto"
+                              ColumnSpacing="12"
+                              VerticalOptions="Center">
+                            <Image x:Name="SmallCover"
+                                   WidthRequest="40"
+                                   HeightRequest="40"
+                                   Aspect="AspectFill"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center" />
 
-                        <!-- Shuffle -->
-                        <ImageButton Grid.Column="0"
-                                     x:Name="btnShuffle"
-                                     Source="shuffle.png"
-                                     BackgroundColor="Transparent"
-                                     Opacity="0.5"
-                                     HeightRequest="26"
-                                     WidthRequest="26"
-                                     Clicked="OnShuffleClicked">
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroupList>
-                                    <VisualStateGroup x:Name="CommonStates">
-                                        <VisualState x:Name="Normal">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="1" />
-                                                <Setter Property="Opacity" Value="0.9" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState x:Name="PointerOver">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="1.07" />
-                                                <Setter Property="Opacity" Value="1" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState x:Name="Pressed">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="0.96" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateGroupList>
-                            </VisualStateManager.VisualStateGroups>
-                        </ImageButton>
+                            <ImageButton Grid.Column="1"
+                                         BackgroundColor="Transparent"
+                                         Padding="0"
+                                         WidthRequest="36"
+                                         HeightRequest="36"
+                                         x:Name="PlayPauseBtnImg"
+                                         Source="play_btn.png"
+                                         Clicked="OnPlayPauseClicked" />
+                        </Grid>
+                    </Border>
 
-                        <!-- Prev -->
-                        <ImageButton Grid.Column="1"
-                                     Source="prev.png"
-                                     BackgroundColor="Transparent"
-                                     HeightRequest="34"
-                                     WidthRequest="34"
-                                     Clicked="OnPrevClicked">
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroupList>
-                                    <VisualStateGroup x:Name="CommonStates">
-                                        <VisualState x:Name="Normal">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="1" />
-                                                <Setter Property="Opacity" Value="0.9" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState x:Name="PointerOver">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="1.07" />
-                                                <Setter Property="Opacity" Value="1" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState x:Name="Pressed">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="0.96" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateGroupList>
-                            </VisualStateManager.VisualStateGroups>
-                        </ImageButton>
+                    <ImageButton Grid.Column="3"
+                                 Source="next.png"
+                                 BackgroundColor="Transparent"
+                                 HeightRequest="34"
+                                 WidthRequest="34"
+                                 Clicked="OnNextClicked">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroupList>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <VisualState.Setters>
+                                            <Setter Property="Scale" Value="1" />
+                                            <Setter Property="Opacity" Value="0.9" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Property="Scale" Value="1.07" />
+                                            <Setter Property="Opacity" Value="1" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter Property="Scale" Value="0.96" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateGroupList>
+                        </VisualStateManager.VisualStateGroups>
+                    </ImageButton>
 
-                        <!-- Play / Pause -->
-                        <ImageButton Grid.Column="2"
-                                     x:Name="PlayPauseBtnImg"
-                                     Source="play_btn.png"
-                                     BackgroundColor="Transparent"
-                                     HeightRequest="48"
-                                     WidthRequest="48"
-                                     Clicked="OnPlayPauseClicked">
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroupList>
-                                    <VisualStateGroup x:Name="CommonStates">
-                                        <VisualState x:Name="Normal">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="1" />
-                                                <Setter Property="Opacity" Value="0.95" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState x:Name="PointerOver">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="1.1" />
-                                                <Setter Property="Opacity" Value="1" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState x:Name="Pressed">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="0.97" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateGroupList>
-                            </VisualStateManager.VisualStateGroups>
-                        </ImageButton>
+                    <ImageButton Grid.Column="4"
+                                 Source="mute.png"
+                                 BackgroundColor="Transparent"
+                                 HeightRequest="22"
+                                 WidthRequest="22"
+                                 Clicked="OnMuteClicked">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroupList>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <VisualState.Setters>
+                                            <Setter Property="Scale" Value="1" />
+                                            <Setter Property="Opacity" Value="0.9" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Property="Scale" Value="1.07" />
+                                            <Setter Property="Opacity" Value="1" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter Property="Scale" Value="0.96" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateGroupList>
+                        </VisualStateManager.VisualStateGroups>
+                    </ImageButton>
+                </Grid>
 
-                        <!-- Next -->
-                        <ImageButton Grid.Column="3"
-                                     Source="next.png"
-                                     BackgroundColor="Transparent"
-                                     HeightRequest="34"
-                                     WidthRequest="34"
-                                     Clicked="OnNextClicked">
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroupList>
-                                    <VisualStateGroup x:Name="CommonStates">
-                                        <VisualState x:Name="Normal">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="1" />
-                                                <Setter Property="Opacity" Value="0.9" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState x:Name="PointerOver">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="1.07" />
-                                                <Setter Property="Opacity" Value="1" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState x:Name="Pressed">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="0.96" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateGroupList>
-                            </VisualStateManager.VisualStateGroups>
-                        </ImageButton>
+                <Grid Grid.Column="2"
+                      ColumnDefinitions="Auto,80,Auto"
+                      ColumnSpacing="10"
+                      VerticalOptions="Center"
+                      HorizontalOptions="End">
 
-                        <!-- Repeat -->
-                        <ImageButton Grid.Column="4"
-                                     x:Name="btnRepeat"
-                                     Source="repeat.png"
-                                     BackgroundColor="Transparent"
-                                     Opacity="0.5"
-                                     HeightRequest="26"
-                                     WidthRequest="26"
-                                     Clicked="OnRepeatClicked">
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroupList>
-                                    <VisualStateGroup x:Name="CommonStates">
-                                        <VisualState x:Name="Normal">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="1" />
-                                                <Setter Property="Opacity" Value="0.9" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState x:Name="PointerOver">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="1.07" />
-                                                <Setter Property="Opacity" Value="1" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState x:Name="Pressed">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="0.96" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateGroupList>
-                            </VisualStateManager.VisualStateGroups>
-                        </ImageButton>
+                    <Image x:Name="lblArtistBar"
+                           Source="volume.png"
+                           HeightRequest="20"
+                           VerticalOptions="Center" />
 
-                    </Grid>
+                    <Slider x:Name="volumeSlider"
+                            Grid.Column="1"
+                            Minimum="0" Maximum="1"
+                            MinimumTrackColor="{StaticResource AccentColor}"
+                            MaximumTrackColor="#555"
+                            ThumbColor="{StaticResource AccentColor}"
+                            ValueChanged="OnVolumeChanged" />
 
-                    <!-- Right: volume -->
-                    <HorizontalStackLayout Grid.Column="2"
-                                           Spacing="8"
-                                           HorizontalOptions="End">
-                        <ImageButton x:Name="btnMute"
-                                     Source="volume.png"
-                                     BackgroundColor="Transparent"
-                                     HeightRequest="24"
-                                     WidthRequest="24"
-                                     Clicked="OnMuteClicked">
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroupList>
-                                    <VisualStateGroup x:Name="CommonStates">
-                                        <VisualState x:Name="Normal">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="1" />
-                                                <Setter Property="Opacity" Value="0.9" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState x:Name="PointerOver">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="1.07" />
-                                                <Setter Property="Opacity" Value="1" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState x:Name="Pressed">
-                                            <VisualState.Setters>
-                                                <Setter Property="Scale" Value="0.96" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateGroupList>
-                            </VisualStateManager.VisualStateGroups>
-                        </ImageButton>
-
-                        <Slider x:Name="volumeSlider"
-                                Minimum="0"
-                                Maximum="1"
-                                Value="0.7"
-                                WidthRequest="140"
-                                MinimumTrackColor="{StaticResource AccentColor}"
-                                MaximumTrackColor="#444"
-                                ThumbColor="{StaticResource AccentColor}"
-                                VerticalOptions="Center"
-                                ValueChanged="OnVolumeChanged" />
-                    </HorizontalStackLayout>
-
+                    <Label x:Name="lblTitleBar"
+                           Grid.Column="2"
+                           FontSize="12"
+                           TextColor="#DDDDDD"
+                           LineBreakMode="TailTruncation"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center" />
                 </Grid>
             </Grid>
         </Grid>
-
-        <!-- Hidden helper UI (старі поля, які використовує код) -->
-        <Grid x:Name="playlistOverlay"
-              Grid.RowSpan="3"
-              IsVisible="False" />
-
-        <Image x:Name="SmallCover" IsVisible="False" />
-        <Label x:Name="lblArtistBar" IsVisible="False" />
-
     </Grid>
 </ContentPage>
