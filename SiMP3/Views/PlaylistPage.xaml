@@ -4,20 +4,95 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:models="clr-namespace:SiMP3.Models"
-    BackgroundColor="#0D0D0D">
+    BackgroundColor="#0A0A0A">
 
     <ContentPage.Resources>
         <ResourceDictionary>
-            <Color x:Key="SurfaceColor">#121212</Color>
-            <Color x:Key="CardColor">#161616</Color>
-            <Color x:Key="BorderColor">#1F1F1F</Color>
-            <Color x:Key="AccentColor">#3A57E8</Color>
+            <Color x:Key="PageBackgroundColor">#0A0A0A</Color>
+            <Color x:Key="SurfaceColor">#121216</Color>
+            <Color x:Key="CardColor">#14141A</Color>
+            <Color x:Key="BorderColor">#1F1F28</Color>
+            <Color x:Key="AccentColor">#C084FC</Color>
             <Color x:Key="PrimaryTextColor">#FFFFFF</Color>
-            <Color x:Key="MutedTextColor">#B0B0B0</Color>
+            <Color x:Key="MutedTextColor">#B5B5C0</Color>
+
+            <Style x:Key="IconButton" TargetType="Border">
+                <Setter Property="WidthRequest" Value="48" />
+                <Setter Property="HeightRequest" Value="48" />
+                <Setter Property="BackgroundColor" Value="{StaticResource SurfaceColor}" />
+                <Setter Property="Stroke" Value="{StaticResource BorderColor}" />
+                <Setter Property="StrokeThickness" Value="1" />
+                <Setter Property="StrokeShape" Value="RoundRectangle 16" />
+                <Setter Property="Padding" Value="0" />
+            </Style>
+
+            <DataTemplate x:Key="PlaylistCardTemplate" x:DataType="models:PlaylistModel">
+                <SwipeView>
+                    <SwipeView.RightItems>
+                        <SwipeItems Mode="Reveal">
+                            <SwipeItem
+                                Text="Видалити"
+                                BackgroundColor="#E53935"
+                                IconImageSource="delete.png"
+                                Invoked="OnDeletePlaylistSwipe" />
+                        </SwipeItems>
+                    </SwipeView.RightItems>
+                    <Border
+                        BackgroundColor="{StaticResource CardColor}"
+                        Stroke="{StaticResource BorderColor}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 16"
+                        Padding="12"
+                        Margin="0">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalOptions="Center">
+                            <Border
+                                WidthRequest="50"
+                                HeightRequest="50"
+                                BackgroundColor="{StaticResource BorderColor}"
+                                StrokeShape="RoundRectangle 12"
+                                StrokeThickness="0"
+                                VerticalOptions="Center">
+                                <Image
+                                    Source="list.png"
+                                    Aspect="AspectFit"
+                                    Margin="12" />
+                            </Border>
+
+                            <StackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                <Label
+                                    Text="{Binding Name}"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    TextColor="{StaticResource PrimaryTextColor}" />
+                                <Label
+                                    Text="{Binding Tracks.Count, StringFormat=' {0} композицій'}"
+                                    FontSize="13"
+                                    TextColor="{StaticResource MutedTextColor}" />
+                            </StackLayout>
+
+                            <Border
+                                Grid.Column="2"
+                                Style="{StaticResource IconButton}"
+                                BackgroundColor="{StaticResource AccentColor}"
+                                HorizontalOptions="End"
+                                VerticalOptions="Center">
+                                <ImageButton
+                                    Padding="10"
+                                    BackgroundColor="Transparent"
+                                    Source="play_btn.png"
+                                    Clicked="OnPlayPlaylistClicked" />
+                            </Border>
+                        </Grid>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnPlaylistTapped" />
+                        </Border.GestureRecognizers>
+                    </Border>
+                </SwipeView>
+            </DataTemplate>
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <Grid RowSpacing="12" Padding="16" BackgroundColor="#0D0D0D">
+    <Grid RowSpacing="14" Padding="16" BackgroundColor="{StaticResource PageBackgroundColor}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -25,21 +100,21 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" ColumnSpacing="12" VerticalOptions="Center">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="12" VerticalOptions="Center">
             <Label
-                Text="Playlists"
+                Text="Плейлисти"
                 FontSize="22"
                 FontAttributes="Bold"
                 TextColor="{StaticResource PrimaryTextColor}" />
-            <Button
-                Grid.Column="1"
-                Text="New playlist"
-                Clicked="OnAddPlaylistClicked"
-                TextColor="{StaticResource PrimaryTextColor}"
-                BackgroundColor="{StaticResource AccentColor}"
-                CornerRadius="12"
-                Padding="14,10"
-                HorizontalOptions="End" />
+            <Border Grid.Column="1" Style="{StaticResource IconButton}" BackgroundColor="{StaticResource AccentColor}">
+                <ImageButton
+                    Padding="12"
+                    BackgroundColor="Transparent"
+                    Source="add_folder.png"
+                    Clicked="OnAddPlaylistClicked"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+            </Border>
         </Grid>
 
         <!-- List -->
@@ -49,82 +124,32 @@
             ItemsSource="{Binding FilteredPlaylists}"
             SelectionMode="None"
             Margin="0,4,0,80"
-            BackgroundColor="Transparent">
+            BackgroundColor="Transparent"
+            ItemTemplate="{StaticResource PlaylistCardTemplate}">
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
             </CollectionView.ItemsLayout>
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:PlaylistModel">
-                    <SwipeView>
-                        <SwipeView.RightItems>
-                            <SwipeItems Mode="Reveal">
-                                <SwipeItem
-                                    Text="Delete"
-                                    BackgroundColor="#E53935"
-                                    IconImageSource="cancel.png"
-                                    Invoked="OnDeletePlaylistSwipe" />
-                            </SwipeItems>
-                        </SwipeView.RightItems>
-                        <Border
-                            BackgroundColor="{StaticResource CardColor}"
-                            Stroke="{StaticResource BorderColor}"
-                            StrokeThickness="1"
-                            StrokeShape="RoundRectangle 14"
-                            Padding="14"
-                            Margin="0">
-                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalOptions="Center">
-                                <Image
-                                    Source="list.png"
-                                    WidthRequest="36"
-                                    HeightRequest="36"
-                                    Aspect="AspectFit" />
-                                <StackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
-                                    <Label
-                                        Text="{Binding Name}"
-                                        FontSize="16"
-                                        FontAttributes="Bold"
-                                        TextColor="{StaticResource PrimaryTextColor}" />
-                                    <Label
-                                        Text="{Binding Tracks.Count, StringFormat=' {0} tracks'}"
-                                        FontSize="13"
-                                    TextColor="{StaticResource MutedTextColor}" />
-                                </StackLayout>
-                                <Button
-                                    Grid.Column="2"
-                                    Text="Play"
-                                    Padding="12,6"
-                                    CornerRadius="12"
-                                    TextColor="{StaticResource PrimaryTextColor}"
-                                    BackgroundColor="{StaticResource AccentColor}"
-                                    Clicked="OnPlayPlaylistClicked" />
-                            </Grid>
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnPlaylistTapped" />
-                            </Border.GestureRecognizers>
-                        </Border>
-                    </SwipeView>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
         </CollectionView>
+        
         <!-- Mini player -->
         <Grid Grid.Row="2" Padding="0" VerticalOptions="End" HorizontalOptions="Fill" RowSpacing="0">
             <Border
                 x:Name="MiniPlayerBar"
-                Padding="10"
+                Padding="12"
                 BackgroundColor="{StaticResource SurfaceColor}"
                 Stroke="{StaticResource BorderColor}"
                 StrokeThickness="1"
                 StrokeShape="RoundRectangle 18"
-                HeightRequest="64"
+                HeightRequest="72"
                 IsVisible="False"
                 TranslationY="6"
-                Margin="0,0,0,4">
+                Margin="0,0,0,6">
                 <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="12" VerticalOptions="Center">
                     <Border
-                        WidthRequest="44"
-                        HeightRequest="44"
+                        WidthRequest="48"
+                        HeightRequest="48"
                         BackgroundColor="{StaticResource BorderColor}"
-                        StrokeShape="RoundRectangle 10"
+                        StrokeShape="RoundRectangle 12"
                         StrokeThickness="0"
                         VerticalOptions="Center">
                         <Image
@@ -137,13 +162,13 @@
                     <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
                         <Label
                             x:Name="MiniTitle"
-                            FontSize="13"
+                            FontSize="14"
                             FontAttributes="Bold"
                             TextColor="{StaticResource PrimaryTextColor}"
                             LineBreakMode="TailTruncation" />
                         <Label
                             x:Name="MiniArtist"
-                            FontSize="11"
+                            FontSize="12"
                             TextColor="{StaticResource MutedTextColor}"
                             LineBreakMode="TailTruncation" />
                     </VerticalStackLayout>
@@ -152,8 +177,8 @@
                         Grid.Column="2"
                         Source="prev.png"
                         BackgroundColor="Transparent"
-                        HeightRequest="28"
-                        WidthRequest="28"
+                        HeightRequest="30"
+                        WidthRequest="30"
                         Clicked="OnPrevClicked" />
 
                     <ImageButton
@@ -161,16 +186,16 @@
                         x:Name="MiniPlayPauseBtn"
                         Source="play_btn.png"
                         BackgroundColor="Transparent"
-                        HeightRequest="32"
-                        WidthRequest="32"
+                        HeightRequest="36"
+                        WidthRequest="36"
                         Clicked="OnPlayPauseClicked" />
 
                     <ImageButton
                         Grid.Column="4"
                         Source="next.png"
                         BackgroundColor="Transparent"
-                        HeightRequest="28"
-                        WidthRequest="28"
+                        HeightRequest="30"
+                        WidthRequest="30"
                         Clicked="OnNextClicked" />
                 </Grid>
 

@@ -5,13 +5,14 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:models="clr-namespace:SiMP3.Models"
-    BackgroundColor="#050505">
+    BackgroundColor="#0A0A0A">
 
 <ContentPage.Resources>
         <ResourceDictionary>
-            <Color x:Key="SurfaceColor">#0E0E10</Color>
-            <Color x:Key="CardColor">#12131A</Color>
-            <Color x:Key="BorderColor">#1E2030</Color>
+            <Color x:Key="PageBackgroundColor">#0A0A0A</Color>
+            <Color x:Key="SurfaceColor">#121216</Color>
+            <Color x:Key="CardColor">#14141A</Color>
+            <Color x:Key="BorderColor">#1F1F28</Color>
             <Color x:Key="AccentColor">#C084FC</Color>
             <Color x:Key="PrimaryTextColor">#FFFFFF</Color>
             <Color x:Key="MutedTextColor">#B5B5C0</Color>
@@ -25,10 +26,86 @@
                 <Setter Property="StrokeShape" Value="RoundRectangle 16" />
                 <Setter Property="Padding" Value="0" />
             </Style>
+
+            <Style x:Key="TrackCardStyle" TargetType="Border">
+                <Setter Property="BackgroundColor" Value="{StaticResource CardColor}" />
+                <Setter Property="Stroke" Value="{StaticResource BorderColor}" />
+                <Setter Property="StrokeThickness" Value="1" />
+                <Setter Property="StrokeShape" Value="RoundRectangle 16" />
+                <Setter Property="Padding" Value="12" />
+            </Style>
+
+            <DataTemplate x:Key="TrackRowTemplate" x:DataType="models:TrackModel">
+                <SwipeView>
+                    <SwipeView.RightItems>
+                        <SwipeItems Mode="Reveal">
+                            <SwipeItem
+                                Text="Видалити"
+                                BackgroundColor="#E53935"
+                                IconImageSource="delete.png"
+                                Invoked="OnRemoveTrackSwipe" />
+                        </SwipeItems>
+                    </SwipeView.RightItems>
+                    <Border Style="{StaticResource TrackCardStyle}">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalOptions="Center">
+                            <Border
+                                WidthRequest="50"
+                                HeightRequest="50"
+                                BackgroundColor="{StaticResource BorderColor}"
+                                StrokeShape="RoundRectangle 12"
+                                StrokeThickness="0"
+                                VerticalOptions="Center">
+                                <Image Source="{Binding Cover}" Aspect="AspectFill" />
+                            </Border>
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                <Label
+                                    Text="{Binding Title}"
+                                    FontSize="15"
+                                    FontAttributes="Bold"
+                                    TextColor="{StaticResource PrimaryTextColor}"
+                                    LineBreakMode="TailTruncation" />
+                                <Label
+                                    Text="{Binding Artist}"
+                                    FontSize="13"
+                                    TextColor="{StaticResource MutedTextColor}"
+                                    LineBreakMode="TailTruncation" />
+                            </VerticalStackLayout>
+
+                            <Label
+                                Grid.Column="2"
+                                Text="{Binding DurationString}"
+                                FontSize="12"
+                                TextColor="{StaticResource MutedTextColor}"
+                                VerticalOptions="Center"
+                                HorizontalOptions="End" />
+                        </Grid>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnTrackTapped" />
+                        </Border.GestureRecognizers>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup Name="CommonStates">
+                                <VisualState Name="Normal">
+                                    <VisualState.Setters>
+                                        <Setter Property="BackgroundColor" Value="{StaticResource CardColor}" />
+                                        <Setter Property="Stroke" Value="{StaticResource BorderColor}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState Name="Selected">
+                                    <VisualState.Setters>
+                                        <Setter Property="BackgroundColor" Value="#191C2A" />
+                                        <Setter Property="Stroke" Value="{StaticResource AccentColor}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                    </Border>
+                </SwipeView>
+            </DataTemplate>
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <Grid RowSpacing="16" Padding="18" BackgroundColor="#050505">
+    <Grid RowSpacing="16" Padding="18" BackgroundColor="{StaticResource PageBackgroundColor}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -88,77 +165,15 @@
             ItemsSource="{Binding Tracks}"
             SelectionMode="Single"
             SelectionChanged="OnTrackSelected"
-            Margin="0,4,0,0"
-            BackgroundColor="Transparent">
+            Margin="0,6,0,0"
+            BackgroundColor="Transparent"
+            ItemTemplate="{StaticResource TrackRowTemplate}">
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
             </CollectionView.ItemsLayout>
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:TrackModel">
-                    <SwipeView>
-                        <SwipeView.RightItems>
-                            <SwipeItems Mode="Reveal">
-                                <SwipeItem
-                                    Text="Видалити"
-                                    BackgroundColor="#E53935"
-                                    IconImageSource="delete.png"
-                                    Invoked="OnRemoveTrackSwipe" />
-                            </SwipeItems>
-                        </SwipeView.RightItems>
-                        <Border
-                            BackgroundColor="{StaticResource CardColor}"
-                            Stroke="{StaticResource BorderColor}"
-                            StrokeThickness="1"
-                            StrokeShape="RoundRectangle 16"
-                            Padding="12,10">
-                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalOptions="Center">
-                                <Image
-                                    Source="{Binding Cover}"
-                                    WidthRequest="52"
-                                    HeightRequest="52"
-                                    Aspect="AspectFill" />
-                                <StackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
-                                    <Label
-                                        Text="{Binding Title}"
-                                        FontSize="15"
-                                        FontAttributes="Bold"
-                                        TextColor="{StaticResource PrimaryTextColor}" />
-                                    <Label
-                                        Text="{Binding Artist}"
-                                        FontSize="13"
-                                        TextColor="{StaticResource MutedTextColor}" />
-                                </StackLayout>
-                                <Label
-                                    Grid.Column="2"
-                                    Text="{Binding DurationString}"
-                                    FontSize="13"
-                                    TextColor="{StaticResource MutedTextColor}"
-                                    VerticalOptions="Center" />
-                            </Grid>
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnTrackTapped" />
-                            </Border.GestureRecognizers>
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroup Name="CommonStates">
-                                    <VisualState Name="Normal">
-                                        <VisualState.Setters>
-                                            <Setter Property="BackgroundColor" Value="{StaticResource CardColor}" />
-                                            <Setter Property="Stroke" Value="{StaticResource BorderColor}" />
-                                        </VisualState.Setters>
-                                    </VisualState>
-                                    <VisualState Name="Selected">
-                                        <VisualState.Setters>
-                                            <Setter Property="BackgroundColor" Value="#191C2A" />
-                                            <Setter Property="Stroke" Value="{StaticResource AccentColor}" />
-                                        </VisualState.Setters>
-                                    </VisualState>
-                                </VisualStateGroup>
-                            </VisualStateManager.VisualStateGroups>
-                        </Border>
-                    </SwipeView>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
+            
         </CollectionView>
+        
         <!-- Mini player -->
         <Grid Grid.Row="3" Padding="0,8,0,0">
             <Border

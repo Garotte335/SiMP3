@@ -10,85 +10,71 @@
         <Color x:Key="ShellSurface">#121216</Color>
         <Color x:Key="ShellBorder">#1F1F28</Color>
     </Shell.Resources>
-    
+
     <Shell.TitleView>
-        <Grid Padding="14,10" BackgroundColor="{StaticResource ShellBackground}" RowSpacing="10">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <Grid Padding="14,10" BackgroundColor="{StaticResource ShellBackground}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-            <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12" VerticalOptions="Center">
-                <Label
-                    Text="SiMP3"
-                    FontSize="21"
-                    FontAttributes="Bold"
-                    TextColor="White"
-                    VerticalOptions="Center" />
+            <!-- Логотип/назва -->
+            <Label
+            Text="SiMP3"
+            FontSize="21"
+            FontAttributes="Bold"
+            TextColor="White"
+            VerticalOptions="Center"
+            Margin="0,0,10,0"/>
 
-                <Border
-                    Grid.Column="1"
-                    WidthRequest="44"
-                    HeightRequest="44"
-                    BackgroundColor="{StaticResource ShellSurface}"
-                    Stroke="{StaticResource ShellBorder}"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 14"
-                    HorizontalOptions="End"
-                    VerticalOptions="Center">
-                    <ImageButton
-                        x:Name="SearchToggleButton"
-                        Padding="10"
-                        BackgroundColor="Transparent"
-                        Source="search.png"
-                        Clicked="OnSearchTapped"
-                        HorizontalOptions="Center"
-                        VerticalOptions="Center" />
-                </Border>
-
-                <Border
-                    Grid.Column="2"
-                    WidthRequest="40"
-                    HeightRequest="40"
-                    BackgroundColor="{StaticResource ShellSurface}"
-                    Stroke="{StaticResource ShellBorder}"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 12"
-                    HorizontalOptions="End"
-                    VerticalOptions="Center">
-                    <ImageButton
-                        x:Name="SettingsButton"
-                        Padding="10"
-                        BackgroundColor="Transparent"
-                        Source="menu.png"
-                        Clicked="OnSettingsClicked"
-                        HorizontalOptions="Center"
-                        VerticalOptions="Center" />
-                </Border>
-            </Grid>
-
+            <!-- 🔥 SearchBar замість кнопки -->
             <Border
-                Grid.Row="1"
-                BackgroundColor="{StaticResource ShellSurface}"
-                Stroke="{StaticResource ShellBorder}"
-                StrokeThickness="1"
-                StrokeShape="RoundRectangle 14"
-                Padding="10,6"
-                IsVisible="False"
-                x:Name="SearchBarContainer">
+            Grid.Column="1"
+            HeightRequest="40"
+            BackgroundColor="{StaticResource ShellSurface}"
+            Stroke="{StaticResource ShellBorder}"
+            StrokeThickness="1"
+            StrokeShape="RoundRectangle 14"
+            Padding="4,2"
+            Margin="0,0,12,0"
+            HorizontalOptions="Fill"
+            VerticalOptions="Center">
+
                 <SearchBar
-                    x:Name="GlobalSearchBar"
-                    Placeholder="Пошук треків"
-                    TextChanged="OnSearchTextChanged"
-                    BackgroundColor="Transparent"
-                    FontSize="14"
-                    TextColor="White"
-                    PlaceholderColor="#A0A0A0"
-                    CancelButtonColor="{StaticResource ShellAccent}"
-                    HeightRequest="36"
-                    HorizontalOptions="Fill"
-                    VerticalOptions="Center" />
+                x:Name="GlobalSearchBar"
+                Placeholder="Пошук треків"
+                TextChanged="OnSearchTextChanged"
+                BackgroundColor="Transparent"
+                FontSize="14"
+                TextColor="White"
+                PlaceholderColor="#A0A0A0"
+                CancelButtonColor="{StaticResource ShellAccent}"
+                HeightRequest="30"
+                HorizontalOptions="Fill"
+                VerticalOptions="Center"
+                Margin="0" />
+            </Border>
+
+            <!-- Кнопка Settings -->
+            <Border
+            Grid.Column="2"
+            WidthRequest="40"
+            HeightRequest="40"
+            BackgroundColor="{StaticResource ShellSurface}"
+            Stroke="{StaticResource ShellBorder}"
+            StrokeThickness="1"
+            StrokeShape="RoundRectangle 12"
+            HorizontalOptions="End"
+            VerticalOptions="Center">
+                <ImageButton
+                x:Name="SettingsButton"
+                Padding="10"
+                BackgroundColor="Transparent"
+                Source="menu.png"
+                Clicked="OnSettingsClicked" />
             </Border>
         </Grid>
     </Shell.TitleView>
+
 </Shell>
