@@ -30,8 +30,6 @@ namespace SiMP3;
             ContentTemplate = new DataTemplate(() => App.Services.GetRequiredService<AndroidMainPage>()),
             Title = "Домівка"
         });
-
-        UpdateBackButtonVisibility();
     }
 
     protected override void OnNavigating(ShellNavigatingEventArgs args)
@@ -44,7 +42,6 @@ namespace SiMP3;
     {
         base.OnNavigated(args);
         _overlayService.HandleNavigated(CurrentPage);
-        UpdateBackButtonVisibility();
     }
 
     private async void OnSettingsClicked(object sender, EventArgs e)
@@ -76,21 +73,6 @@ namespace SiMP3;
         else
         {
             GlobalSearchBar.Text = string.Empty;
-        }
-    }
-
-    private void UpdateBackButtonVisibility()
-    {
-        var stackCount = Shell.Current?.Navigation?.NavigationStack?.Count ?? 0;
-        BackButtonContainer.IsVisible = stackCount > 1;
-    }
-
-    private async void OnBackTapped(object sender, EventArgs e)
-    {
-        var navigation = Shell.Current?.Navigation;
-        if (navigation?.NavigationStack?.Count > 1)
-        {
-            await navigation.PopAsync();
         }
     }
 }

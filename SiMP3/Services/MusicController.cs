@@ -563,7 +563,6 @@ namespace SiMP3.Services
                 {
                     _currentIndex = 0;
                     UpdateIsCurrentFlags();
-                    NotifyTrackChanged(track);
                 }
             });
 
