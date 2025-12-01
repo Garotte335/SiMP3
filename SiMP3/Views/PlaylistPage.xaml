@@ -77,10 +77,7 @@
                             </SwipeItems>
                         </SwipeView.RightItems>
                         <Border
-                            BackgroundColor="{StaticResource CardColor}"
-                            Stroke="{StaticResource BorderColor}"
-                            StrokeThickness="1"
-                            StrokeShape="RoundRectangle 16"
+                            Style="{StaticResource TrackCardStyle}"
                             Padding="14,12"
                             Margin="0">
                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" VerticalOptions="Center">

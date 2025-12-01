@@ -7,7 +7,7 @@
     xmlns:models="clr-namespace:SiMP3.Models"
     BackgroundColor="#050505">
 
-<ContentPage.Resources>
+    <ContentPage.Resources>
         <ResourceDictionary>
             <Color x:Key="SurfaceColor">#0E0E10</Color>
             <Color x:Key="CardColor">#12131A</Color>

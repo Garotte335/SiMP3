@@ -15,7 +15,7 @@
         <Color x:Key="ShellSurface">#121216</Color>
         <Color x:Key="ShellBorder">#1F1F28</Color>
     </Shell.Resources>
-    
+
     <Shell.TitleView>
         <Grid Padding="14,10" BackgroundColor="{StaticResource ShellBackground}" RowSpacing="10">
             <Grid.RowDefinitions>
@@ -79,7 +79,7 @@
                 StrokeThickness="1"
                 StrokeShape="RoundRectangle 14"
                 Padding="10,6"
-                IsVisible="False"
+                IsVisible="True"
                 x:Name="SearchBarContainer">
                 <SearchBar
                     x:Name="GlobalSearchBar"
@@ -88,7 +88,7 @@
                     BackgroundColor="Transparent"
                     FontSize="14"
                     TextColor="White"
-                    PlaceholderColor="#121216"
+                    PlaceholderColor="#697087"
                     CancelButtonColor="{StaticResource ShellAccent}"
                     HeightRequest="36"
                     HorizontalOptions="Fill"

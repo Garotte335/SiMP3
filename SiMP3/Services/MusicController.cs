@@ -86,6 +86,13 @@ namespace SiMP3.Services
             }
         }
 
+        private void UpdateIsCurrentFlags()
+        {
+            var currentPath = CurrentTrack?.Path;
+            foreach (var t in Tracks)
+                t.IsCurrent = (t.Path == currentPath);
+        }
+
         public bool IsPlaying => _isPlaying;
         public bool IsShuffle => _isShuffle;
         public int RepeatMode => _repeatMode;
@@ -247,7 +254,8 @@ namespace SiMP3.Services
                     {
                         ApplyFilterAndSort();
                         _currentIndex = Tracks.IndexOf(track);
-                        TrackChanged?.Invoke(track);
+                        UpdateIsCurrentFlags();
+                        NotifyTrackChanged(track);
                     }
                 }
                 else
@@ -270,6 +278,27 @@ namespace SiMP3.Services
         public event Action<TimeSpan, TimeSpan, double>? ProgressChanged;
         public event Action<double, bool>? VolumeStateChanged;
         public event Action<float[]>? SpectrumFrameAvailable;
+
+        private void NotifyTrackChanged(TrackModel track)
+        {
+            UpdateCurrentTrackIndicator(track);
+            TrackChanged?.Invoke(track);
+        }
+
+        private void UpdateCurrentTrackIndicator(TrackModel? current)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                lock (_tracksLock)
+                {
+                    foreach (var track in _allTracks.Values)
+                    {
+                        track.IsCurrent = current != null &&
+                            string.Equals(track.Path, current.Path, StringComparison.OrdinalIgnoreCase);
+                    }
+                }
+            });
+        }
 
         #endregion
 
@@ -359,7 +388,8 @@ namespace SiMP3.Services
             if (_currentIndex == -1 && Tracks.Count > 0)
             {
                 _currentIndex = Tracks.IndexOf(model);
-                TrackChanged?.Invoke(model);
+                UpdateIsCurrentFlags();
+                NotifyTrackChanged(model);
             }
 
             return model;
@@ -532,7 +562,8 @@ namespace SiMP3.Services
                 if (_currentIndex == -1 && Tracks.Count > 0)
                 {
                     _currentIndex = 0;
-                    TrackChanged?.Invoke(Tracks[_currentIndex]);
+                    UpdateIsCurrentFlags();
+                    NotifyTrackChanged(track);
                 }
             });
 
@@ -556,6 +587,7 @@ namespace SiMP3.Services
                 return;
 
             _currentIndex = index;
+            UpdateIsCurrentFlags();
             PlayCurrentInternal();
         }
 
@@ -575,6 +607,7 @@ namespace SiMP3.Services
                 return;
             }
 
+            UpdateIsCurrentFlags();
             PlayCurrentInternal();
         }
 
@@ -590,6 +623,7 @@ namespace SiMP3.Services
             _currentPlaylist = list;
             _currentPlaylistIndex = 0;
             _currentIndex = -1;
+            UpdateIsCurrentFlags();
             PlayCurrentInternal();
         }
 
@@ -607,6 +641,7 @@ namespace SiMP3.Services
                     _currentIndex = 0;
                 }
 
+                UpdateIsCurrentFlags();
                 PlayCurrentInternal();
                 return;
             }
@@ -648,6 +683,7 @@ namespace SiMP3.Services
             if (track == null)
                 return;
 
+            UpdateIsCurrentFlags();
             try
             {
                 // Safely dispose previous player and stream, then create new ones
@@ -695,7 +731,7 @@ namespace SiMP3.Services
                 _player.Play();
                 _isPlaying = true;
                 PlayStateChanged?.Invoke(true);
-                TrackChanged?.Invoke(track);
+                NotifyTrackChanged(track);
             }
             catch
             {
@@ -741,6 +777,7 @@ namespace SiMP3.Services
                     }
                 }
 
+                UpdateIsCurrentFlags();
                 PlayCurrentInternal();
                 return;
             }
@@ -764,6 +801,7 @@ namespace SiMP3.Services
                 }
             }
 
+            UpdateIsCurrentFlags();
             PlayCurrentInternal();
         }
 
@@ -784,6 +822,7 @@ namespace SiMP3.Services
                         _currentPlaylistIndex = 0;
                 }
 
+                UpdateIsCurrentFlags();
                 PlayCurrentInternal();
                 return;
             }
@@ -804,6 +843,7 @@ namespace SiMP3.Services
                     _currentIndex = 0;
             }
 
+            UpdateIsCurrentFlags();
             PlayCurrentInternal();
         }
 
@@ -832,6 +872,8 @@ namespace SiMP3.Services
 
             _isPlaying = false;
             PlayStateChanged?.Invoke(false);
+
+            UpdateCurrentTrackIndicator(null);
         }
 
         public void SetVisualizationActive(bool enabled)
@@ -1059,6 +1101,8 @@ namespace SiMP3.Services
             {
                 _currentIndex = -1;
             }
+
+            UpdateIsCurrentFlags();
         }
 
         #endregion
